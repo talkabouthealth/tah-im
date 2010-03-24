@@ -1,3 +1,5 @@
+package com.tah.im;
+
 import improject.IMException;
 import improject.IMSession;
 import improject.Message;
