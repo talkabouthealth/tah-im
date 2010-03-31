@@ -16,10 +16,10 @@ public class echo {
 	final IMSession session = new IMSession();
 		
 	// Add login information of required user(s)
-	session.addLogin(IMService.YAHOO, "YahooID", "YahooPass");
-	session.addLogin(IMService.MSN, "MSNID", "MSNPass");
-	session.addLogin(IMService.GOOGLE, "GTalkID", "GTalkPass");
-	session.addLogin(IMService.SKYPE, "SkypeID", "SkypePass");
+	//session.addLogin(IMService.YAHOO, "YahooID", "YahooPass");
+	//session.addLogin(IMService.MSN, "MSNID", "MSNPass");
+	session.addLogin(IMService.GOOGLE, "testIM5566@gmail.com", "hu183183");
+	//session.addLogin(IMService.SKYPE, "SkypeID", "SkypePass");
 		
 	//add message listener(s) for all service
 	session.addMessageListener(new MessageListener() {
