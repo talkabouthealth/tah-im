@@ -8,12 +8,12 @@ public class testIM {
 		String[][] data_list2 = {{"thero666@gmail.com", "talkabouthealth.com@gmail.com"}, 
                 {"http://www.facebook.com", "http://www.gamefaq.com"}};
 		
-		IMInterface MyInterface = new IMInterface();
+		IMNotifier MyNotifier = new IMNotifier();
 								
 		
-		MyInterface.Broadcast(data_list);
+		MyNotifier.Broadcast(data_list);
 		
-		MyInterface.Broadcast(data_list2);
+		MyNotifier.Broadcast(data_list2);
 	
 		
 	}

@@ -4,18 +4,17 @@ import improject.IMException;
 import improject.IMSession;
 import improject.Message;
 import improject.MessageListener;
-//import improject.MessageListener;
 import improject.IMSession.IMService;
 
 
-public class IMInterface {
+public class IMNotifier {
 
 	private IMSession session;
 	private String MainAccount;
 	private String MainPasswd;
 	
 	//Constructor: login when creating the IMInterface
-	public IMInterface(){
+	public IMNotifier(){
 		//login by this account		
 		this.MainAccount = "testIM5566@gmail.com";
 		this.MainPasswd = "hu183183";
