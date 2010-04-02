@@ -5,9 +5,16 @@ public class testIM {
 		String[][] data_list = {{"thero666@gmail.com", "talkabouthealth.com@gmail.com"}, 
                 {"http://yahoo.com", "http://www.google.com"}}; 
 		
-		IMInterface MyInterface = new IMInterface();
+		String[][] data_list2 = {{"thero666@gmail.com", "talkabouthealth.com@gmail.com"}, 
+                {"http://www.facebook.com", "http://www.gamefaq.com"}};
 		
-		MyInterface.Broadcast(data_list);	
+		IMInterface MyInterface = new IMInterface();
+								
+		
+		MyInterface.Broadcast(data_list);
+		
+		MyInterface.Broadcast(data_list2);
+	
 		
 	}
 }

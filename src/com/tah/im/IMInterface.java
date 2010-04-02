@@ -3,6 +3,7 @@ package com.tah.im;
 import improject.IMException;
 import improject.IMSession;
 import improject.Message;
+import improject.MessageListener;
 //import improject.MessageListener;
 import improject.IMSession.IMService;
 
@@ -13,6 +14,7 @@ public class IMInterface {
 	private String MainAccount;
 	private String MainPasswd;
 	
+	//Constructor: login when creating the IMInterface
 	public IMInterface(){
 		//login by this account		
 		this.MainAccount = "testIM5566@gmail.com";
@@ -22,6 +24,39 @@ public class IMInterface {
 		
 		session.addLogin(IMService.GOOGLE, MainAccount, MainPasswd);
 		
+		//add message listener(s) for all service
+		session.addMessageListener(new MessageListener() {
+		  @Override
+	  	  public void messageReceived(Message message) {
+	          // Print received message
+			System.out.println("Message received:");
+			System.out.println(message);
+					
+	          // Discover & print user "online?" status
+			try {
+				System.out.println("User is online? " + session.isOnline(message.getTo(), message.getFrom()));
+			} catch (IMException e) {
+				e.printStackTrace();
+			}
+			
+			// Send reply to the same service/user it came from
+			System.out.println("Sending reply...\n");
+
+			Message replyMessage = new Message();
+			replyMessage.setImService(message.getImService());
+			replyMessage.setBody("Hi!");
+			replyMessage.setFrom(message.getTo());
+			replyMessage.setTo(message.getFrom());
+
+			try {
+				session.sendMessage(replyMessage);
+			} catch (IMException e) {
+				e.printStackTrace();
+			}
+		  }
+		});
+		
+		//connect 
 		try { 
 			session.connect();
 		} catch (IMException e) {
