@@ -21,9 +21,9 @@ public class IMInterface_b {
 		//setting Broadcast Message
 		Message bMessage = new Message();
 		bMessage.setImService(IMService.GOOGLE);
-		bMessage.setBody("Hi!Hi!This is Broadcast!");
+		bMessage.setBody("No Link Now. Try it later.");  //default Message
 		bMessage.setFrom(MainAccount);
-		//bMessage.setTo(userAccounts[0]);		
+		//bMessage.setTo(); SetTo in the loop		
 			
 		try { 
 			session.connect();
@@ -38,6 +38,7 @@ public class IMInterface_b {
 			e.printStackTrace();
 		}
 		
+		//Sending Message
 		try {
 				for(int j = 0; j < Data_list[0].length; j++){
 					if(session.isOnline(MainAccount, Data_list[0][j])){
@@ -50,28 +51,6 @@ public class IMInterface_b {
 		} catch (IMException e) {
 			e.printStackTrace();
 		}	
-			
-		// Wait in the loop for incoming messages; 
-		// incoming messages will trigger above 
-		// MessageListener function
-		// Send broadcast in loop
-		/*while (true) {
-	        try {
-				Thread.sleep(50000);
-				/*try {
-					for(int i=0;i<userAccounts.length;i++){
-						if(session.isOnline(MainAccount, userAccounts[i])){
-							bMessage.setTo(userAccounts[i]);
-							session.sendMessage(bMessage);
-						}
-					}
-				} catch (IMException e) {
-					e.printStackTrace();
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}*/		
-		//return 0;
+
 	}
 }
