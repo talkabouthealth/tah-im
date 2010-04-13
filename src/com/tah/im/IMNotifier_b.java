@@ -7,7 +7,7 @@ import improject.MessageListener;
 import improject.IMSession.IMService;
 
 
-public class IMNotifier_b{
+public class IMNotifier_b {
 
 	private IMSession session;
 	private String MainAccount;

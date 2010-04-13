@@ -1,5 +1,9 @@
 package com.tah.im;
 
+import java.sql.SQLException;
+
+import com.tah.matcher.SQL_CON;
+
 import improject.IMException;
 import improject.IMSession;
 import improject.Message;
@@ -78,7 +82,9 @@ public class IMNotifier {
 		thread.start();		
 	}
 
-	public void Broadcast(final String[][] Data_list) {
+	public void Broadcast(final String[][] Data_list, int[] UID) throws Exception {
+		
+		int topic_id=0; //temp topic 
 		
 		System.out.println("Broadcast...\n");
 		
@@ -96,14 +102,35 @@ public class IMNotifier {
 		
 		//Sending Message
 		try {
+				//Link to DB
+				SQL_CON SQL_Conn = new SQL_CON();
+				
 				for(int i = 0; i < Data_list[0].length; i++){
 					if(session.isOnline(MainAccount, Data_list[0][i])){
 						System.out.println(Data_list[0][i] + " is online. Send messages to it");
 						bMessage.setTo(Data_list[0][i]);
 						bMessage.setBody("Please use the link: " + Data_list[1][i]);
 						session.sendMessage(bMessage);
+						
+						//record in DB
+						try {
+							
+							SQL_Conn.InsertToNoti(UID[i],topic_id,1);
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
+					}
+					else{
+						try {
+							SQL_Conn.InsertToNoti(UID[i],topic_id,0);
+						} catch (SQLException e){
+							e.printStackTrace();
+						}
 					}
 				}
+				
+				SQL_Conn.CloseLink();
+				
 		} catch (IMException e) {
 			e.printStackTrace();
 		}				
