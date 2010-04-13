@@ -6,7 +6,7 @@ import improject.Message;
 import improject.MessageListener;
 import improject.IMSession.IMService;
 
-
+//trying to monitoring users by loop
 public class IMNotifier_b {
 
 	private IMSession session;

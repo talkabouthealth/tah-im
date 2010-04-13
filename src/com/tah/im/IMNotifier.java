@@ -82,9 +82,10 @@ public class IMNotifier {
 		thread.start();		
 	}
 
-	public void Broadcast(final String[][] Data_list, int[] UID) throws Exception {
+	public boolean Broadcast(final String[][] Data_list, int[] UID) throws Exception {
 		
-		int topic_id=0; //temp topic 
+		int topic_id=0; //temp topic
+		int count =0; //counts of successful sending
 		
 		System.out.println("Broadcast...\n");
 		
@@ -112,9 +113,9 @@ public class IMNotifier {
 						bMessage.setBody("Please use the link: " + Data_list[1][i]);
 						session.sendMessage(bMessage);
 						
+						count++;
 						//record in DB
 						try {
-							
 							SQL_Conn.InsertToNoti(UID[i],topic_id,1);
 						} catch (SQLException e) {
 							e.printStackTrace();
@@ -128,12 +129,16 @@ public class IMNotifier {
 						}
 					}
 				}
-				
-				SQL_Conn.CloseLink();
+								
+				SQL_Conn.CloseLink();  //close DB
 				
 		} catch (IMException e) {
 			e.printStackTrace();
-		}				
+		}
+		
+		if(count < Data_list[0].length) return false;
+		else return true;				
 			
 	}//end of Broadcast
+	
 }
