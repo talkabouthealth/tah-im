@@ -82,10 +82,13 @@ public class IMNotifier {
 		thread.start();		
 	}
 
-	public boolean Broadcast(final String[][] Data_list, int[] UID) throws Exception {
+	public boolean Broadcast(final String[] mail_list, int[] UID) throws Exception {
 		
 		int topic_id=0; //temp topic
 		int count =0; //counts of successful sending
+		
+		String url = "http://talkabouthealth.com/chat?uid=";
+		String des = "Please join the disscusion of the topic. Use the link: ";
 		
 		System.out.println("Broadcast...\n");
 		
@@ -106,11 +109,11 @@ public class IMNotifier {
 				//Link to DB
 				SQL_CON SQL_Conn = new SQL_CON();
 				
-				for(int i = 0; i < Data_list[0].length; i++){
-					if(session.isOnline(MainAccount, Data_list[0][i])){
-						System.out.println(Data_list[0][i] + " is online. Send messages to it");
-						bMessage.setTo(Data_list[0][i]);
-						bMessage.setBody("Please use the link: " + Data_list[1][i]);
+				for(int i = 0; i < mail_list.length; i++){
+					if(session.isOnline(MainAccount, mail_list[i])){
+						System.out.println(mail_list[i] + " is online. Send messages to it");
+						bMessage.setTo(mail_list[i]);
+						bMessage.setBody(des + url + UID[i]);
 						session.sendMessage(bMessage);
 						
 						count++;
@@ -136,7 +139,7 @@ public class IMNotifier {
 			e.printStackTrace();
 		}
 		
-		if(count < Data_list[0].length) return false;
+		if(count < mail_list.length) return false;
 		else return true;				
 			
 	}//end of Broadcast
