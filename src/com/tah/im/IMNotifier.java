@@ -1,14 +1,13 @@
 package com.tah.im;
 
-import java.sql.SQLException;
-
-import com.tah.matcher.SQL_CON;
-
 import improject.IMException;
 import improject.IMSession;
 import improject.Message;
 import improject.MessageListener;
 import improject.IMSession.IMService;
+
+import java.sql.SQLException;
+
 
 
 public class IMNotifier {

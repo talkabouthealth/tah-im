@@ -22,7 +22,7 @@ public class SQL_CON {
 		this.db_host = "localhost";
 		this.db_name = "talkmidb";
 		this.db_user = "root";
-		this.db_password = "dvl";
+		this.db_password = "eltonatubuntu";
 		con = setCon(db_host, db_name, db_user, db_password);
 	}
 	
