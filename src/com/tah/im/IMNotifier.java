@@ -19,8 +19,8 @@ public class IMNotifier {
 	//Constructor: login when creating the IMInterface
 	public IMNotifier(){
 		//login by this account		
-		this.MainAccount = "testIM5566@gmail.com";
-		this.MainPasswd = "hu183183";
+		this.MainAccount = "talkabouthealth.com@gmail.com";
+		this.MainPasswd = "CarrotCake917";
 		
 		this.session = new IMSession();
 		

@@ -21,8 +21,8 @@ public class SQL_CON {
 	public SQL_CON() throws Exception{
 		this.db_host = "localhost";
 		this.db_name = "talkmidb";
-		this.db_user = "root";
-		this.db_password = "eltonatubuntu";
+		this.db_user = "talkmidb";
+		this.db_password = "applepie";
 		con = setCon(db_host, db_name, db_user, db_password);
 	}
 	
@@ -81,12 +81,12 @@ public class SQL_CON {
     	final String tableName = "noti_history";
     	String insertdbSQL = "insert into " + tableName +
         " select ifNULL(max(noti_hist_id),0)+1,?,?,?,? FROM "+ tableName;
-    	
+    	/*
     	//delete data of the same uid
     	String deletedbSQL = "delete from " + tableName + " WHERE uid = " + uid;
     	sqlStatement = con.createStatement();
     	sqlStatement.executeUpdate(deletedbSQL);
-    	
+    	*/
     	Timestamp t = new Timestamp(new Date().getTime()); // get current time
     	
     	pst = con.prepareStatement(insertdbSQL);	
