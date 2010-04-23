@@ -1,109 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- WARNING: Eclipse auto-generated file.
-              Any modifications will be overwritten.
-              To include a user specific buildfile here, simply create one in the same
-              directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="tah-im">
-    <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../Tools/eclipse"/>
-    <property name="tah-dashboard.location" value="../tah-dashboard"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
-    <path id="EAR Libraries.libraryclasspath"/>
-    <path id="Apache Tomcat v6.0 [Apache Tomcat v6.0].libraryclasspath">
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/annotations-api.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/tomcat-i18n-fr.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/mysql-connector-java-5.1.12-bin.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/catalina-ha.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/tomcat-dbcp.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/jasper-el.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/el-api.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/jasper-jdt.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/catalina.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/jsp-api.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/catalina-ant.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/tomcat-i18n-es.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/tomcat-i18n-ja.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/catalina-tribes.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/servlet-api.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/jasper.jar"/>
-        <pathelement location="${ECLIPSE_HOME}/apache-tomcat-6.0.26/lib/tomcat-coyote.jar"/>
-    </path>
-    <path id="tah-im.classpath">
-        <pathelement location="bin"/>
-        <pathelement location="lib/imapi.jar"/>
-        <pathelement location="lib/jml-1.0b3-full.jar"/>
-        <pathelement location="lib/openymsg_0.2.jar"/>
-        <pathelement location="lib/skype_win32.jar"/>
-        <pathelement location="lib/smack.jar"/>
-        <pathelement location="lib/smackx.jar"/>
-        <path refid="EAR Libraries.libraryclasspath"/>
-        <path refid="Apache Tomcat v6.0 [Apache Tomcat v6.0].libraryclasspath"/>
-    </path>
-    <target name="init">
-    	
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir=".">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-                <exclude name="src/"/>
-            </fileset>
-        </copy>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="clean">
-        <delete dir="bin"/>
-    </target>
-    <target depends="clean" name="cleanall"/>
-    <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects"/>
-    <target depends="init" name="build-project">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
-            <src path="."/>
-            <exclude name="src/"/>
-            <classpath refid="tah-im.classpath"/>
-        </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
-            <src path="src"/>
-            <classpath refid="tah-im.classpath"/>
-        </javac>
-    </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
-        <ant antfile="${tah-dashboard.location}/build2.xml" dir="${tah-dashboard.location}" inheritAll="false" target="clean"/>
-        <ant antfile="${tah-dashboard.location}/build2.xml" dir="${tah-dashboard.location}" inheritAll="false" target="build">
-            <propertyset>
-                <propertyref name="build.compiler"/>
-            </propertyset>
-        </ant>
-    </target>
-    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
-        <copy todir="${ant.library.dir}">
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </copy>
-        <unzip dest="${ant.library.dir}">
-            <patternset includes="jdtCompilerAdapter.jar"/>
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </unzip>
-    </target>
-    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
-        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-        <antcall target="build"/>
-    </target>
-	<target name="jar" depends="build">
-		<mkdir dir="bin/jar"/>
-		<jar destfile="tah-im-notifier.jar" basedir="bin"/>
+<project basedir="." default="jar" name="tah-im">
+	<target name = "init" description = "initiate path">
+		<property name = "binDir" value = "${basedir}/bin" />
+		<property name = "srcDir" value = "${basedir}/src" />
+		<property name = "libDir" value = "${basedir}/lib" />
+		<property name = "jarDir" value = "${basedir}/../tah-dashboard/WebContent/WEB-INF/lib" />
+		<path id = "tah-im-classpath">
+			<fileset dir = "${libDir}" />
+			<fileset file = "/usr/local/tomcat/lib/mysql-connector-java-5.1.12-bin.jar" />
+		</path>
 	</target>
-    <target name="run" depends="jar">
-        <java classname="com.tah.im.testIM"/>
-    		<classpath path="."/>
-    </target>
+	<target name = "clean" depends = "init" description = "clean up .class, . jar">
+		<delete dir = "${binDir}" />
+		<delete file = "${jarDir}/tah-im.jar" />
+	</target>
+	<target name = "compile" depends = "clean" description = "compile .java">
+		<mkdir dir = "${binDir}" />
+		<javac srcdir = "${srcDir}" destdir = "${binDir}" debug = "true">
+			<classpath refid = "tah-im-classpath" />
+		</javac>
+	</target>
+	<target name = "jar" depends = "compile" description = "pack into a jar file and copy to dashboard">
+		<jar destfile = "${jarDir}/tah-im.jar" basedir = "${binDir}" />
+	</target>
 </project>
