@@ -81,7 +81,7 @@ public class IMNotifier {
 		thread.start();		
 	}
 
-	public boolean Broadcast(final String[] mail_list, int[] UID) throws Exception {
+	public boolean Broadcast(final String[] mail_list, int[] UID, int _tid) throws Exception {
 		
 		int topic_id=0; //temp topic
 		int count =0; //counts of successful sending
@@ -118,14 +118,14 @@ public class IMNotifier {
 						count++;
 						//record in DB
 						try {
-							SQL_Conn.InsertToNoti(UID[i],topic_id,1);
+							SQL_Conn.InsertToNoti(UID[i],_tid,1);
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
 					}
 					else{
 						try {
-							SQL_Conn.InsertToNoti(UID[i],topic_id,0);
+							SQL_Conn.InsertToNoti(UID[i],_tid,0);
 						} catch (SQLException e){
 							e.printStackTrace();
 						}

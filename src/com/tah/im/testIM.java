@@ -13,7 +13,7 @@ public class testIM {
 		IMNotifier MyNotifier = new IMNotifier();
 								
 		
-		System.out.println("Is it broadcast to all users? " + MyNotifier.Broadcast(mail_list, UID));
+		System.out.println("Is it broadcast to all users? " + MyNotifier.Broadcast(mail_list, UID, 0));
 		
 		//MyNotifier.Broadcast(data_list2);
 	
