@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="jar" name="tah-im">
-	<property name="BASE" location="/base"/>
+<project name = "tah-im" basedir="." default="jar">
+	
+	<property name= "BASE" location="/base"/>
 	<property name = "binDir" value = "${basedir}/bin" />
 	<property name = "srcDir" value = "${basedir}/src" />
 	<property name = "libDir" value = "${basedir}/lib" />
