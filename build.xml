@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="jar" name="tah-im">
-	<target name = "init" description = "initiate path">
-		<property name = "binDir" value = "${basedir}/bin" />
-		<property name = "srcDir" value = "${basedir}/src" />
-		<property name = "libDir" value = "${basedir}/lib" />
-		<property name = "jarDir" value = "${basedir}/../tah-dashboard/WebContent/WEB-INF/lib" />
-		<path id = "tah-im-classpath">
-			<fileset dir = "${libDir}" />
-			<fileset file = "/usr/local/tomcat/lib/mysql-connector-java-5.1.12-bin.jar" />
-		</path>
-	</target>
-	<target name = "clean" depends = "init" description = "clean up .class, . jar">
+<project name = "tah-im" basedir="." default="jar">
+	
+	<property name= "BASE" location="/base"/>
+	<property name = "binDir" value = "${basedir}/bin" />
+	<property name = "srcDir" value = "${basedir}/src" />
+	<property name = "libDir" value = "${basedir}/lib" />
+	<property name = "jarDir" value = "${basedir}/../tah-dashboard/WebContent/WEB-INF/lib" />
+	<path id = "tah-im-classpath">
+		<fileset dir = "${libDir}" />
+		<fileset file = "${BASE}/servers/apache-tomcat-6.0.26/lib/mysql-connector-java-5.1.12-bin.jar" />
+	</path>
+				
+	<target name = "clean" description = "clean up .class, . jar">
 		<delete dir = "${binDir}" />
 		<delete file = "${jarDir}/tah-im.jar" />
 	</target>
