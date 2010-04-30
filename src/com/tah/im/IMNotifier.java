@@ -6,6 +6,7 @@ import improject.Message;
 import improject.MessageListener;
 import improject.IMSession.IMService;
 
+
 import java.sql.SQLException;
 
 
@@ -79,11 +80,30 @@ public class IMNotifier {
             }        
         }); 
 		thread.start();		
+		try { 
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
+	public boolean isUserOnline(String email) throws Exception{
 
+		if(this.session.isOnline(MainAccount, email )){
+			System.out.println( email + " is online");
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public IMSession getSession(){
+		return session;
+	}
+	public String getMainAcc(){
+		return MainAccount;
+	}
+	
 	public boolean Broadcast(final String[] mail_list, int[] UID, int _tid) throws Exception {
 		
-		int topic_id=0; //temp topic
 		int count =0; //counts of successful sending
 		
 		String url = "http://talkabouthealth.com/chat?uid=";
@@ -143,4 +163,5 @@ public class IMNotifier {
 			
 	}//end of Broadcast
 	
+
 }
