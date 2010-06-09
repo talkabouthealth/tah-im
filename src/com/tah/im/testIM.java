@@ -11,29 +11,35 @@ public class testIM {
                 {"http://yahoo.com", "http://www.google.com"}};
 		*/
         
-		String[] mail_list = {"testIM1122@gmail.com"};
+
 		
-		int[] UID = {12};
-		/*
+
+	/*	
 		IMNotifier MyNotifier = IMNotifier.getInstance();
 		 List<String> onlineUsers = MyNotifier.getSession().getOnlineContacts(MyNotifier.getMainAcc());
+		 IMNotifierYahoo MyNotifierYahoo = IMNotifierYahoo.getInstance();
+		 List<String> onlineUsersYahoo = MyNotifierYahoo.getSession().getOnlineContacts(MyNotifierYahoo.getMainAcc());		 
+*/
+		 IMNotifierMSN MyNotifierMSN = IMNotifierMSN.getInstance();
+		 List<String> onlineUsersMSN = MyNotifierMSN.getSession().getOnlineContacts(MyNotifierMSN.getMainAcc());		 
+/*		 
 		 System.out.println("The following users from google talk are online: " + onlineUsers.size());
 		 for(int i = 0; i < onlineUsers.size(); i++){
 			 System.out.println(onlineUsers.get(i));
 		 }
 		 System.out.println("================================================ ");	
-		
-		 IMNotifierYahoo MyNotifierYahoo = IMNotifierYahoo.getInstance();
-		 List<String> onlineUsersYahoo = MyNotifierYahoo.getSession().getOnlineContacts(MyNotifierYahoo.getMainAcc());
+*/		
+		/*
+
 		 System.out.println("The following users from Yahoo are online: ");
 		 for(int i = 0; i < onlineUsersYahoo.size(); i++){
 			 System.out.println(onlineUsersYahoo.get(i));
 		 }
 		 System.out.println("================================================ ");
 		
+		
 		*/
-		 IMNotifierMSN MyNotifierMSN = IMNotifierMSN.getInstance();
-		 List<String> onlineUsersMSN = MyNotifierMSN.getSession().getOnlineContacts(MyNotifierMSN.getMainAcc());
+
 		 System.out.println("The following users from MSN are online: ");
 		 for(int i = 0; i < onlineUsersMSN.size(); i++){
 			 System.out.println(onlineUsersMSN.get(i));

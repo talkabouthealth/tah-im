@@ -122,12 +122,14 @@ public class MSNAdapter extends AbstractServiceAdapter {
 		List<String> onlineContacts = new ArrayList<String>();
 		
 		MsnContactList contactList = messenger.getContactList();
+//		System.out.println("=====Online user list from MSNAdapter=====");
 		for (MsnContact user : contactList.getContacts()) {
 			if (user.getStatus() == MsnUserStatus.ONLINE) {
-				onlineContacts.add(user.getOldDisplayName()); // change from getId() to getOldDisplayName()
+//				System.out.println("DisplayName: " + user.getDisplayName() + ", FriendlyName: " + user.getFriendlyName() + ", Id: " + user.getId() + ", OldDisplayName: " + user.getOldDisplayName() + ", PersonalMessage: " + user.getPersonalMessage());
+				onlineContacts.add(user.getFriendlyName()); // change from getId() to getFriendlyName()
 			}
 		}
-		
+//		System.out.println("=====Online user list from MSNAdapter end=====");
 		return onlineContacts;
 	}
 }

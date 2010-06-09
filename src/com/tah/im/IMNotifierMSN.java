@@ -80,10 +80,19 @@ public class IMNotifierMSN  {
 						try {
 							userInfo _user = new userInfo(userMail);
 							System.out.println(userMail + " is adding in to online user list");	
-								onlineUserInfo.put(userMail, _user);
-								
+								onlineUserInfo.put(userMail, _user);						
 								System.out.println(onlineUserInfo.get(userMail).getUname() + " is added in to online user list");						
-							
+								try {
+									onlineUsers = session.getOnlineContacts(MainAccount);
+								} catch (IMException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								System.out.println("Latest online user list after " + userMail + " joined.");
+								for(i = 0; i < onlineUsers.size(); i++){
+									
+									System.out.println(onlineUsers.get(i));
+								}							
 
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
@@ -97,10 +106,25 @@ public class IMNotifierMSN  {
 					System.out.println(onlineUserInfo.get(userMail).getUname() + " is removing from list");
 					onlineUserInfo.remove(userMail);
 					System.out.println(userMail + " is removed from list");
+					try {
+						onlineUsers = session.getOnlineContacts(MainAccount);
+					} catch (IMException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("Latest online user list after " + userMail + " left.");
+					for(i = 0; i < onlineUsers.size(); i++){
+						
+						System.out.println(onlineUsers.get(i));
+					}
 				}
 				
 				try {
 					onlineUsers = session.getOnlineContacts(MainAccount);
+					for(i = 0; i < onlineUsers.size(); i++){
+						System.out.println("online usre list");
+						System.out.println(onlineUsers.get(i));
+					}
 					System.out.println("size of online Users " + onlineUsers.size());
 					System.out.println("size of onlineUserInfo " + onlineUserInfo.size());
 					System.out.println("================Start===================");
