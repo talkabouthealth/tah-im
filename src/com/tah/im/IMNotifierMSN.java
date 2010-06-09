@@ -15,22 +15,23 @@ import java.util.Map;
 
 
 
-public class IMNotifier {
+public class IMNotifierMSN  {
 
 	private IMSession session;
 	private String MainAccount;
 	private String MainPasswd;
+	private List<String> onlineUsers;
 	private Map<String, userInfo> onlineUserInfo = new HashMap<String, userInfo>();
-	private static IMNotifier _instance = new IMNotifier();
+	private static IMNotifierMSN _instance = new IMNotifierMSN();
 	//Constructor: login when creating the IMInterface
-	private IMNotifier(){
+	private IMNotifierMSN(){
 		//login by this account		
-		this.MainAccount = "talkabouthealth.com@gmail.com";
+		this.MainAccount = "talkabouthealth.com@live.com";
 		this.MainPasswd = "CarrotCake917";
 		
 		this.session = new IMSession();
 		
-		session.addLogin(IMService.GOOGLE, MainAccount, MainPasswd);
+		session.addLogin(IMService.MSN, MainAccount, MainPasswd);
 		
 		//add message listener(s) for all service
 		session.addMessageListener(new MessageListener() {
@@ -65,21 +66,23 @@ public class IMNotifier {
 			  }
 		});
 		
-		session.addUserListener(new UserListener(){
+		session.addUserListener (new UserListener () {
 
 			@Override
-			public void statusChanged(String user, String newStatus){
+			public void statusChanged(String user, String newStatus) {
+				int i = 0;
 				// TODO Auto-generated method stub
-				int end = user.indexOf("/");
-				String userMail = user.substring(0, end);
-
-				if(newStatus.equals("available")){
+	//			int end = user.indexOf("/");
+				String userMail = user;
+				System.out.println(userMail + " is " + newStatus);
+				if(newStatus.equals("ONLINE")){
 					if(!onlineUserInfo.containsKey(userMail)){
 						try {
 							userInfo _user = new userInfo(userMail);
-
+							System.out.println(userMail + " is adding in to online user list");	
 								onlineUserInfo.put(userMail, _user);
-								System.out.println(userMail + " is added in to online user list");						
+								
+								System.out.println(onlineUserInfo.get(userMail).getUname() + " is added in to online user list");						
 							
 
 						} catch (SQLException e1) {
@@ -91,24 +94,30 @@ public class IMNotifier {
 
 				}
 				else{
-					
+					System.out.println(onlineUserInfo.get(userMail).getUname() + " is removing from list");
 					onlineUserInfo.remove(userMail);
 					System.out.println(userMail + " is removed from list");
 				}
-		
+				
 				try {
-					List<String> onlineUsers = session.getOnlineContacts(MainAccount);
+					onlineUsers = session.getOnlineContacts(MainAccount);
 					System.out.println("size of online Users " + onlineUsers.size());
 					System.out.println("size of onlineUserInfo " + onlineUserInfo.size());
 					System.out.println("================Start===================");
-					for(int i = 0; i < onlineUsers.size(); i++){	
+					System.out.println(i);
+					for(i = 0; i < onlineUsers.size(); i++){	
+						System.out.println("user is " + onlineUsers.get(i));
+						System.out.println("user name is " + onlineUserInfo.get(onlineUsers.get(i)).getUname());
 						if(onlineUserInfo.get(onlineUsers.get(i)).getUname() != null){
 							System.out.println(onlineUserInfo.get(onlineUsers.get(i)).getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i)).getEmail());
 							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i)).getGender());
 							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i)).getlastNotiTime());
 							System.out.println(onlineUsers.get(i) + " has been notified " + onlineUserInfo.get(onlineUsers.get(i)).getTimesBeenNoti() + " times in the past 24 hours.");
 						}
+						System.out.println(i);
+						
 					}
+						
 						System.out.println("================End===================");
 					} catch (IMException e) {
 						// TODO Auto-generated catch block
@@ -150,9 +159,9 @@ public class IMNotifier {
 			e.printStackTrace();
 		}
 	}
-	public static IMNotifier getInstance(){
+	public static IMNotifierMSN getInstance(){
 		if(_instance == null){
-			_instance = new IMNotifier();
+			_instance = new IMNotifierMSN();
 		}
 		return _instance;
 	}
@@ -183,7 +192,7 @@ public class IMNotifier {
 		
 		//setting Broadcast Message
 		Message bMessage = new Message();
-		bMessage.setImService(IMService.GOOGLE);
+		bMessage.setImService(IMService.MSN);
 		bMessage.setBody("No link. Try it later.");  //default message
 		bMessage.setFrom(this.MainAccount);
 		

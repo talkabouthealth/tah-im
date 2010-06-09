@@ -15,22 +15,22 @@ import java.util.Map;
 
 
 
-public class IMNotifier {
+public class IMNotifierYahoo {
 
 	private IMSession session;
 	private String MainAccount;
 	private String MainPasswd;
 	private Map<String, userInfo> onlineUserInfo = new HashMap<String, userInfo>();
-	private static IMNotifier _instance = new IMNotifier();
+	private static IMNotifierYahoo _instance = new IMNotifierYahoo();
 	//Constructor: login when creating the IMInterface
-	private IMNotifier(){
+	private IMNotifierYahoo(){
 		//login by this account		
-		this.MainAccount = "talkabouthealth.com@gmail.com";
+		this.MainAccount = "talkabouthealth@ymail.com";
 		this.MainPasswd = "CarrotCake917";
 		
 		this.session = new IMSession();
 		
-		session.addLogin(IMService.GOOGLE, MainAccount, MainPasswd);
+		session.addLogin(IMService.YAHOO, MainAccount, MainPasswd);
 		
 		//add message listener(s) for all service
 		session.addMessageListener(new MessageListener() {
@@ -70,16 +70,17 @@ public class IMNotifier {
 			@Override
 			public void statusChanged(String user, String newStatus){
 				// TODO Auto-generated method stub
-				int end = user.indexOf("/");
-				String userMail = user.substring(0, end);
-
-				if(newStatus.equals("available")){
+//				int end = user.indexOf("/");
+				String userMail = user + "@yahoo.com";
+				System.out.println(userMail + " is " + newStatus);
+				if(newStatus.equals("AVAILABLE")){
 					if(!onlineUserInfo.containsKey(userMail)){
 						try {
 							userInfo _user = new userInfo(userMail);
-
-								onlineUserInfo.put(userMail, _user);
-								System.out.println(userMail + " is added in to online user list");						
+	//						System.out.println(_user.getUname() + ", " + _user.getEmail());
+							onlineUserInfo.put(userMail, _user);
+								
+							System.out.println(userMail + " is added in to online user list");						
 							
 
 						} catch (SQLException e1) {
@@ -95,18 +96,20 @@ public class IMNotifier {
 					onlineUserInfo.remove(userMail);
 					System.out.println(userMail + " is removed from list");
 				}
-		
+				List<String> onlineUsers;
 				try {
-					List<String> onlineUsers = session.getOnlineContacts(MainAccount);
+					onlineUsers = session.getOnlineContacts(MainAccount);
 					System.out.println("size of online Users " + onlineUsers.size());
 					System.out.println("size of onlineUserInfo " + onlineUserInfo.size());
-					System.out.println("================Start===================");
+					System.out.println("================Start1===================");
 					for(int i = 0; i < onlineUsers.size(); i++){	
-						if(onlineUserInfo.get(onlineUsers.get(i)).getUname() != null){
-							System.out.println(onlineUserInfo.get(onlineUsers.get(i)).getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i)).getEmail());
-							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i)).getGender());
-							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i)).getlastNotiTime());
-							System.out.println(onlineUsers.get(i) + " has been notified " + onlineUserInfo.get(onlineUsers.get(i)).getTimesBeenNoti() + " times in the past 24 hours.");
+//						System.out.println("================Start2===================");
+						if(onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getUname() != null){
+//							System.out.println("================Start3===================");
+							System.out.println(onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getEmail());
+							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getGender());
+							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getlastNotiTime());
+							System.out.println(onlineUsers.get(i) + " has been notified " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getTimesBeenNoti() + " times in the past 24 hours.");
 						}
 					}
 						System.out.println("================End===================");
@@ -150,9 +153,9 @@ public class IMNotifier {
 			e.printStackTrace();
 		}
 	}
-	public static IMNotifier getInstance(){
+	public static IMNotifierYahoo getInstance(){
 		if(_instance == null){
-			_instance = new IMNotifier();
+			_instance = new IMNotifierYahoo();
 		}
 		return _instance;
 	}
@@ -183,7 +186,7 @@ public class IMNotifier {
 		
 		//setting Broadcast Message
 		Message bMessage = new Message();
-		bMessage.setImService(IMService.GOOGLE);
+		bMessage.setImService(IMService.YAHOO);
 		bMessage.setBody("No link. Try it later.");  //default message
 		bMessage.setFrom(this.MainAccount);
 		
