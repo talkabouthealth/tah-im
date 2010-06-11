@@ -20,7 +20,7 @@ public class IMNotifier {
 	private IMSession session;
 	private String MainAccount;
 	private String MainPasswd;
-	private Map<String, userInfo> onlineUserInfo = new HashMap<String, userInfo>();
+	private Map<String, userInfo> onlineUserInfo = onlineUsersSingleton.getInstance();
 	private static IMNotifier _instance = new IMNotifier();
 	//Constructor: login when creating the IMInterface
 	private IMNotifier(){
@@ -77,10 +77,11 @@ public class IMNotifier {
 					if(!onlineUserInfo.containsKey(userMail)){
 						try {
 							userInfo _user = new userInfo(userMail);
-
+							System.out.println(_user.getUname() + " is onw ONLINE");
+							if(_user.getUname() != null){
 								onlineUserInfo.put(userMail, _user);
 								System.out.println(userMail + " is added in to online user list");						
-							
+							}
 
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
@@ -102,14 +103,21 @@ public class IMNotifier {
 					System.out.println("size of onlineUserInfo " + onlineUserInfo.size());
 					System.out.println("================Start===================");
 					for(int i = 0; i < onlineUsers.size(); i++){	
-						if(onlineUserInfo.get(onlineUsers.get(i)).getUname() != null){
+						if(onlineUserInfo.containsKey(onlineUsers.get(i))){
+							int _uid = onlineUserInfo.get(onlineUsers.get(i)).getUid();
 							System.out.println(onlineUserInfo.get(onlineUsers.get(i)).getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i)).getEmail());
 							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i)).getGender());
-							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i)).getlastNotiTime());
+							try {
+								System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i)).getlastNotiTime(_uid));
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							System.out.println(onlineUsers.get(i) + " has been notified " + onlineUserInfo.get(onlineUsers.get(i)).getTimesBeenNoti() + " times in the past 24 hours.");
 						}
+
 					}
-						System.out.println("================End===================");
+					System.out.println("================End===================");
 					} catch (IMException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

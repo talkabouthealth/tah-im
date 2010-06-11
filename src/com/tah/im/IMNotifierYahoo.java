@@ -20,7 +20,7 @@ public class IMNotifierYahoo {
 	private IMSession session;
 	private String MainAccount;
 	private String MainPasswd;
-	private Map<String, userInfo> onlineUserInfo = new HashMap<String, userInfo>();
+	private Map<String, userInfo> onlineUserInfo = onlineUsersSingleton.getInstance();
 	private static IMNotifierYahoo _instance = new IMNotifierYahoo();
 	//Constructor: login when creating the IMInterface
 	private IMNotifierYahoo(){
@@ -78,10 +78,11 @@ public class IMNotifierYahoo {
 						try {
 							userInfo _user = new userInfo(userMail);
 	//						System.out.println(_user.getUname() + ", " + _user.getEmail());
-							onlineUserInfo.put(userMail, _user);
+							if(_user.getUname() != null){
+								onlineUserInfo.put(userMail, _user);
 								
-							System.out.println(userMail + " is added in to online user list");						
-							
+								System.out.println(userMail + " is added in to online user list");						
+							}
 
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
@@ -103,9 +104,7 @@ public class IMNotifierYahoo {
 					System.out.println("size of onlineUserInfo " + onlineUserInfo.size());
 					System.out.println("================Start1===================");
 					for(int i = 0; i < onlineUsers.size(); i++){	
-//						System.out.println("================Start2===================");
-						if(onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getUname() != null){
-//							System.out.println("================Start3===================");
+						if(onlineUserInfo.containsKey(onlineUsers.get(i) + "@yahoo.com")){
 							System.out.println(onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getEmail());
 							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getGender());
 							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i) + "@yahoo.com").getlastNotiTime());

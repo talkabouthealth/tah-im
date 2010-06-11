@@ -34,23 +34,26 @@ public class userInfo {
 			gender = con.getRs().getString("gender");
 			timesBeenNoti = numOfNoti(con.getRs().getInt("uid"), period);
 		}
-		con.getRs().close();
-		con.getCon().close();
+		
+	
 	}
 	public userInfo(String userMail) throws SQLException{
 		String sql = "SELECT talkers.*, MAX(noti_history.noti_time) FROM talkers LEFT JOIN noti_history ON talkers.uid = noti_history.uid WHERE email = '" + userMail + "' GROUP BY talkers.uid ORDER BY MAX(noti_history.noti_time)";
 		con = new dbConnection();
 		con.setRs(sql);
-
+		String period;
+		java.util.Date date= new java.util.Date();
+		period = ((new Timestamp(date.getTime())).getYear() + 1900) + "-" + ((new Timestamp(date.getTime())).getMonth() + 1) + "-" + ((new Timestamp(date.getTime())).getDate()  - 1) + " " + (new Timestamp(date.getTime())).getHours() + ":" + (new Timestamp(date.getTime())).getMinutes() + ":" + (new Timestamp(date.getTime())).getSeconds();
 		while(con.getRs().next()){
-			
+			uid = con.getRs().getInt("talkers.uid");
 			uname = con.getRs().getString("uname");
 			email = con.getRs().getString("email");
 			gender = con.getRs().getString("gender");
 			lastNotiTime = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
+			timesBeenNoti = numOfNoti(uid, period);
 		}
-		con.getRs().close();
-		con.getCon().close();
+		
+		
 	}
 	public int numOfNoti(int _uid, String _time) throws SQLException{
 		int counter;
@@ -61,17 +64,45 @@ public class userInfo {
 		while(con.getRs().next()){
 			counter = con.getRs().getInt("COUNT(*)");
 		}
-		con.getRs().close();
-		con.getCon().close();
+		
+		
 		return counter;
 	}
+	public int getUid(){
+		return uid;
+	}
+	public int getTimesBeenNoti(int _uid, String _time){
+		int timesBeenNoti = 0;
+		try {
+			timesBeenNoti = numOfNoti(_uid, _time);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return timesBeenNoti;
+	}
 	public int getTimesBeenNoti(){
+		int timesBeenNoti = 0;
 		return timesBeenNoti;
 	}
 	public String getUname(){
 		return uname;
 	}
 	public Timestamp getlastNotiTime(){
+		Timestamp lastNotiTime = null;
+		return lastNotiTime;
+	}
+	public Timestamp getlastNotiTime(int _uid) throws SQLException{
+		Timestamp lastNotiTime = null;
+		String sql = "SELECT talkers.*, MAX(noti_history.noti_time) FROM talkers LEFT JOIN noti_history ON talkers.uid = noti_history.uid WHERE uid = '" + _uid + "' GROUP BY talkers.uid ORDER BY MAX(noti_history.noti_time)";
+		con = new dbConnection();
+		con.setRs(sql);
+		while(con.getRs().next()){
+			lastNotiTime = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
+		}
+		con.getRs().close();
+		
+		
 		return lastNotiTime;
 	}
 	public String getEmail(){

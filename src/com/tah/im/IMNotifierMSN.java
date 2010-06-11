@@ -21,7 +21,7 @@ public class IMNotifierMSN  {
 	private String MainAccount;
 	private String MainPasswd;
 	private List<String> onlineUsers;
-	private Map<String, userInfo> onlineUserInfo = new HashMap<String, userInfo>();
+	private Map<String, userInfo> onlineUserInfo = onlineUsersSingleton.getInstance();
 	private static IMNotifierMSN _instance = new IMNotifierMSN();
 	//Constructor: login when creating the IMInterface
 	private IMNotifierMSN(){
@@ -79,9 +79,12 @@ public class IMNotifierMSN  {
 					if(!onlineUserInfo.containsKey(userMail)){
 						try {
 							userInfo _user = new userInfo(userMail);
-							System.out.println(userMail + " is adding in to online user list");	
+							System.out.println(userMail + " is adding in to online user list");
+							if(_user.getUname() != null){
 								onlineUserInfo.put(userMail, _user);						
-								System.out.println(onlineUserInfo.get(userMail).getUname() + " is added in to online user list");						
+								System.out.println(onlineUserInfo.get(userMail).getUname() + " is added in to online user list");
+							}
+							/*
 								try {
 									onlineUsers = session.getOnlineContacts(MainAccount);
 								} catch (IMException e) {
@@ -93,7 +96,7 @@ public class IMNotifierMSN  {
 									
 									System.out.println(onlineUsers.get(i));
 								}							
-
+							*/
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -130,9 +133,7 @@ public class IMNotifierMSN  {
 					System.out.println("================Start===================");
 					System.out.println(i);
 					for(i = 0; i < onlineUsers.size(); i++){	
-						System.out.println("user is " + onlineUsers.get(i));
-						System.out.println("user name is " + onlineUserInfo.get(onlineUsers.get(i)).getUname());
-						if(onlineUserInfo.get(onlineUsers.get(i)).getUname() != null){
+						if(onlineUserInfo.containsKey(onlineUsers.get(i))){
 							System.out.println(onlineUserInfo.get(onlineUsers.get(i)).getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i)).getEmail());
 							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i)).getGender());
 							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i)).getlastNotiTime());
