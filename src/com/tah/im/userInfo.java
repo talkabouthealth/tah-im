@@ -50,7 +50,7 @@ public class userInfo {
 			email = con.getRs().getString("email");
 			gender = con.getRs().getString("gender");
 			lastNotiTime = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
-			timesBeenNoti = numOfNoti(uid, period);
+//			timesBeenNoti = numOfNoti(uid, period);
 		}
 		
 		
@@ -67,6 +67,18 @@ public class userInfo {
 		
 		
 		return counter;
+	}
+	public Timestamp lastNotiTime(int _uid) throws SQLException{
+		Timestamp _time = null;
+		String sql = "SELECT talkers.*, MAX(noti_history.noti_time) FROM talkers LEFT JOIN noti_history ON talkers.uid = noti_history.uid WHERE talkers.uid = '" + _uid + "' GROUP BY talkers.uid ORDER BY MAX(noti_history.noti_time)";
+		con = new dbConnection();
+		con.setRs(sql);
+		while(con.getRs().next()){
+			_time = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
+			System.out.println("User(" + _uid + ") was last notified on " + lastNotiTime);
+		}
+		con.getRs().close();
+		return _time;
 	}
 	public int getUid(){
 		return uid;
@@ -93,12 +105,13 @@ public class userInfo {
 		return lastNotiTime;
 	}
 	public Timestamp getlastNotiTime(int _uid) throws SQLException{
-		Timestamp lastNotiTime = null;
-		String sql = "SELECT talkers.*, MAX(noti_history.noti_time) FROM talkers LEFT JOIN noti_history ON talkers.uid = noti_history.uid WHERE uid = '" + _uid + "' GROUP BY talkers.uid ORDER BY MAX(noti_history.noti_time)";
+//		Timestamp lastNotiTime = null;
+		String sql = "SELECT talkers.*, MAX(noti_history.noti_time) FROM talkers LEFT JOIN noti_history ON talkers.uid = noti_history.uid WHERE talkers.uid = '" + _uid + "' GROUP BY talkers.uid ORDER BY MAX(noti_history.noti_time)";
 		con = new dbConnection();
 		con.setRs(sql);
 		while(con.getRs().next()){
 			lastNotiTime = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
+			System.out.println("User(" + _uid + ") was last notified on " + lastNotiTime);
 		}
 		con.getRs().close();
 		
