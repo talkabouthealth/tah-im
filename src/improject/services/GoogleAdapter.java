@@ -7,6 +7,7 @@ import improject.IMSession.IMService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -143,9 +144,28 @@ public class GoogleAdapter extends AbstractServiceAdapter {
 
 	@Override
 	public void addContact(String contact) throws IMException {
+		/*  Below cause null pointer while add users into contact
 		try {
+			Collection collection =  connection.getRoster().getEntries();
+			Iterator iterator = collection.iterator();
+			while(iterator.hasNext()){
+				RosterEntry rosterEntry = (RosterEntry) iterator.next();
+				System.out.println(rosterEntry);
+			}
 			connection.getRoster().removeEntry(connection.getRoster().getEntry(contact));
 		} catch (XMPPException e) {}		
+		*/
+		if(connection.getRoster().getEntry(contact) != null){
+			try {
+				Collection collection =  connection.getRoster().getEntries();
+				Iterator iterator = collection.iterator();
+				while(iterator.hasNext()){
+					RosterEntry rosterEntry = (RosterEntry) iterator.next();
+					System.out.println(rosterEntry);
+				}
+				connection.getRoster().removeEntry(connection.getRoster().getEntry(contact));
+			} catch (XMPPException e) {}		
+		}
 		try {
 			connection.getRoster().createEntry(contact,contact,null);
 		} catch (XMPPException e) {

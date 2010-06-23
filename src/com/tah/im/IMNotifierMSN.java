@@ -9,9 +9,14 @@ import improject.IMSession.IMService;
 
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.tah.im.singleton.onlineUsersSingleton;
 
 
 
@@ -21,10 +26,9 @@ public class IMNotifierMSN  {
 	private String MainAccount;
 	private String MainPasswd;
 	private List<String> onlineUsers;
-	private Map<String, userInfo> onlineUserInfo = onlineUsersSingleton.getInstance();
-	private static IMNotifierMSN _instance = new IMNotifierMSN();
+	private onlineUsersSingleton onlineUserInfo = onlineUsersSingleton.getInstance();
 	//Constructor: login when creating the IMInterface
-	private IMNotifierMSN(){
+	public IMNotifierMSN(){
 		//login by this account		
 		this.MainAccount = "talkabouthealth.com@live.com";
 		this.MainPasswd = "CarrotCake917";
@@ -50,11 +54,12 @@ public class IMNotifierMSN  {
 				
 				  // Send reply to the same service/user it came from
 					System.out.println("Sending reply...\n");
-	
+					String chatroomUrl;
+					chatroomUrl = " http://talkabouthealth.com/talk12 ";	
 						
 					Message replyMessage = new Message();
 					replyMessage.setImService(message.getImService());
-					replyMessage.setBody("Hi!");
+					replyMessage.setBody("Thank you for starting a conversation. Click on this link to start the conversation: " + chatroomUrl);
 					replyMessage.setFrom(message.getTo());
 					replyMessage.setTo(message.getFrom());
 		
@@ -76,27 +81,20 @@ public class IMNotifierMSN  {
 				String userMail = user;
 				System.out.println(userMail + " is " + newStatus);
 				if(newStatus.equals("ONLINE")){
-					if(!onlineUserInfo.containsKey(userMail)){
+					if(!onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
 						try {
 							userInfo _user = new userInfo(userMail);
-							System.out.println(userMail + " is adding in to online user list");
-							if(_user.getUname() != null){
-								onlineUserInfo.put(userMail, _user);						
-								System.out.println(onlineUserInfo.get(userMail).getUname() + " is added in to online user list");
+							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE");
+							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE" + _user.isExist(userMail));
+							if(_user.isExist(userMail)){
+								onlineUserInfo.addOnlineUser(userMail, _user);		
+								System.out.println(onlineUserInfo);
+								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is added in to online user list");
+							} else{
+								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is not exist.");
+								System.out.println(onlineUserInfo);
 							}
-							/*
-								try {
-									onlineUsers = session.getOnlineContacts(MainAccount);
-								} catch (IMException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								System.out.println("Latest online user list after " + userMail + " joined.");
-								for(i = 0; i < onlineUsers.size(); i++){
-									
-									System.out.println(onlineUsers.get(i));
-								}							
-							*/
+							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -106,52 +104,22 @@ public class IMNotifierMSN  {
 
 				}
 				else{
-					System.out.println(onlineUserInfo.get(userMail).getUname() + " is removing from list");
-					onlineUserInfo.remove(userMail);
-					System.out.println(userMail + " is removed from list");
-					try {
-						onlineUsers = session.getOnlineContacts(MainAccount);
-					} catch (IMException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					System.out.println("Latest online user list after " + userMail + " left.");
-					for(i = 0; i < onlineUsers.size(); i++){
-						
-						System.out.println(onlineUsers.get(i));
+					if(onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
+						System.out.println(onlineUserInfo.getOnlineUser(userMail).getUname() + " is removing from list");
+						onlineUserInfo.removeOnlineUser(userMail);
+						System.out.println(userMail + " is removed from list");
 					}
 				}
-				
-				try {
-					onlineUsers = session.getOnlineContacts(MainAccount);
-					for(i = 0; i < onlineUsers.size(); i++){
-						System.out.println("online usre list");
-						System.out.println(onlineUsers.get(i));
-					}
-					System.out.println("size of online Users " + onlineUsers.size());
-					System.out.println("size of onlineUserInfo " + onlineUserInfo.size());
-					System.out.println("================Start===================");
-					System.out.println(i);
-					for(i = 0; i < onlineUsers.size(); i++){	
-						if(onlineUserInfo.containsKey(onlineUsers.get(i))){
-							System.out.println(onlineUserInfo.get(onlineUsers.get(i)).getUname() + " has IM acc. of " + onlineUserInfo.get(onlineUsers.get(i)).getEmail());
-							System.out.println(onlineUsers.get(i) + " is " + onlineUserInfo.get(onlineUsers.get(i)).getGender());
-							System.out.println(onlineUsers.get(i) + " was last notificated on " + onlineUserInfo.get(onlineUsers.get(i)).getlastNotiTime());
-							System.out.println(onlineUsers.get(i) + " has been notified " + onlineUserInfo.get(onlineUsers.get(i)).getTimesBeenNoti() + " times in the past 24 hours.");
-						}
-						System.out.println(i);
-						
-					}
-						
-						System.out.println("================End===================");
-					} catch (IMException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-
-				
-
+				Collection collection = onlineUserInfo.getOnlineUserMap().values();
+				Iterator iterator = collection.iterator();
+				java.util.Date date= new java.util.Date();
+				String period;
+				System.out.println("************************All online user list*************************" + onlineUserInfo + " MSN");
+				while(iterator.hasNext()){
+					userInfo uI = (userInfo) iterator.next();							
+					System.out.println(uI.getUname() + " is online");
+				}
+				System.out.println("**********************************************************************");
 			}
 			
 		});
@@ -184,12 +152,7 @@ public class IMNotifierMSN  {
 			e.printStackTrace();
 		}
 	}
-	public static IMNotifierMSN getInstance(){
-		if(_instance == null){
-			_instance = new IMNotifierMSN();
-		}
-		return _instance;
-	}
+
 	public boolean isUserOnline(String email) throws Exception{
 
 		if(this.session.isOnline(MainAccount, email )){

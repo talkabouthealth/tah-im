@@ -6,6 +6,7 @@
 	<property name = "srcDir" value = "${basedir}/src" />
 	<property name = "libDir" value = "${basedir}/lib" />
 	<property name = "jarDir" value = "${basedir}/../tah-dashboard/WebContent/WEB-INF/lib" />
+	<property name = "jarDir2" value = "${basedir}/../tah-java/WebContent/WEB-INF/lib" />
 	<path id = "tah-im-classpath">
 		<fileset dir = "${libDir}" />
 		<fileset file = "${BASE}/servers/apache-tomcat-6.0.26/lib/mysql-connector-java-5.1.12-bin.jar" />
@@ -14,6 +15,7 @@
 	<target name = "clean" description = "clean up .class, . jar">
 		<delete dir = "${binDir}" />
 		<delete file = "${jarDir}/tah-im.jar" />
+		<delete file = "${jarDir2}/tah-im.jar" />
 	</target>
 	<target name = "compile" depends = "clean" description = "compile .java">
 		<mkdir dir = "${binDir}" />
@@ -23,5 +25,6 @@
 	</target>
 	<target name = "jar" depends = "compile" description = "pack into a jar file and copy to dashboard">
 		<jar destfile = "${jarDir}/tah-im.jar" basedir = "${binDir}" />
+		<jar destfile = "${jarDir2}/tah-im.jar" basedir = "${binDir}" />
 	</target>
 </project>

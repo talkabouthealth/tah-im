@@ -34,7 +34,8 @@ public class userInfo {
 			gender = con.getRs().getString("gender");
 			timesBeenNoti = numOfNoti(con.getRs().getInt("uid"), period);
 		}
-		
+		con.getRs().close();
+		con.getRs().close();
 	
 	}
 	public userInfo(String userMail) throws SQLException{
@@ -52,21 +53,35 @@ public class userInfo {
 			lastNotiTime = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
 //			timesBeenNoti = numOfNoti(uid, period);
 		}
-		
+		con.getRs().close();
+		con.getCon().close();		
 		
 	}
 	public int numOfNoti(int _uid, String _time) throws SQLException{
 		int counter;
 		counter = 0;
-		
+		con = new dbConnection();
 		String sql = "SELECT COUNT(*) FROM talkers LEFT JOIN noti_history ON talkers.uid = noti_history.uid WHERE noti_history.noti_time > '" + _time + "' AND noti_history.uid =" + _uid + " ORDER BY noti_history.noti_time"; 
 		con.setRs(sql);
 		while(con.getRs().next()){
 			counter = con.getRs().getInt("COUNT(*)");
 		}
-		
+		con.getRs().close();
+		con.getCon().close();				
 		
 		return counter;
+	}
+	public String getIMType(int _uid) throws SQLException{
+		String _imType = null;
+		String sql = "SELECT * FROM talkers WHERE uid = " + _uid;
+		con = new dbConnection();
+		con.setRs(sql);
+		while(con.getRs().next()){
+			_imType = con.getRs().getString("PrimaryIM");
+		}
+		con.getRs().close();
+		con.getCon().close();		
+		return _imType;
 	}
 	public Timestamp lastNotiTime(int _uid) throws SQLException{
 		Timestamp _time = null;
@@ -75,9 +90,10 @@ public class userInfo {
 		con.setRs(sql);
 		while(con.getRs().next()){
 			_time = con.getRs().getTimestamp("MAX(noti_history.noti_time)");
-			System.out.println("User(" + _uid + ") was last notified on " + lastNotiTime);
+//			System.out.println("User(" + _uid + ") was last notified on " + lastNotiTime);
 		}
 		con.getRs().close();
+		con.getCon().close();		
 		return _time;
 	}
 	public int getUid(){
@@ -114,8 +130,7 @@ public class userInfo {
 			System.out.println("User(" + _uid + ") was last notified on " + lastNotiTime);
 		}
 		con.getRs().close();
-		
-		
+		con.getCon().close();		
 		return lastNotiTime;
 	}
 	public String getEmail(){
@@ -123,5 +138,22 @@ public class userInfo {
 	}
 	public String getGender(){
 		return gender;
+	}
+	public boolean isExist(String _mail) throws SQLException{
+		int counter;
+		counter = 0;
+		con = new dbConnection();
+		String sql = "SELECT COUNT(*) FROM talkers WHERE email = '" + _mail + "'"; 
+		con.setRs(sql);
+		while(con.getRs().next()){
+			counter = con.getRs().getInt("COUNT(*)");
+		}
+		con.getRs().close();
+		con.getCon().close();				
+		if(counter >= 1){
+			return true;
+		} else{
+			return false;
+		}
 	}
 }

@@ -14,40 +14,39 @@ public class testIM {
                 {"http://yahoo.com", "http://www.google.com"}};
 		*/
 
-		
+/*		 
 
 		IMNotifier MyNotifier = IMNotifier.getInstance();
-		 List<String> onlineUsers = MyNotifier.getSession().getOnlineContacts(MyNotifier.getMainAcc());
-/*
-		 IMNotifierYahoo MyNotifierYahoo = IMNotifierYahoo.getInstance();
-		 List<String> onlineUsersYahoo = MyNotifierYahoo.getSession().getOnlineContacts(MyNotifierYahoo.getMainAcc());		 
-
-		 IMNotifierMSN MyNotifierMSN = IMNotifierMSN.getInstance();
-		 List<String> onlineUsersMSN = MyNotifierMSN.getSession().getOnlineContacts(MyNotifierMSN.getMainAcc());		 
-	*/
+		List<String> onlineUsers = MyNotifier.getSession().getOnlineContacts(MyNotifier.getMainAcc());
+		MyNotifier.getSession().addContact(MyNotifier.getMainAcc(), "testim1122@gmail.com");
 		 System.out.println("The following users from google talk are online: " + onlineUsers.size());
 		 for(int i = 0; i < onlineUsers.size(); i++){
 			 System.out.println(onlineUsers.get(i));
 		 }
 		 System.out.println("================================================ ");	
-
-/* 
+/*		
+		
+		 IMNotifierYahoo MyNotifierYahoo = IMNotifierYahoo.getInstance();
+		 List<String> onlineUsersYahoo = MyNotifierYahoo.getSession().getOnlineContacts(MyNotifierYahoo.getMainAcc());		 
+//		 MyNotifierYahoo.getSession().addContact(MyNotifierYahoo.getMainAcc(), "testim9900");
 		 System.out.println("The following users from Yahoo are online: ");
 		 for(int i = 0; i < onlineUsersYahoo.size(); i++){
 			 System.out.println(onlineUsersYahoo.get(i));
 		 }
 		 System.out.println("================================================ ");
-		
-/*		
+	
+/*	
 
-
+		 IMNotifierMSN MyNotifierMSN = IMNotifierMSN.getInstance();
+		 List<String> onlineUsersMSN = MyNotifierMSN.getSession().getOnlineContacts(MyNotifierMSN.getMainAcc());
+		 MyNotifierMSN.getSession().addContact(MyNotifierMSN.getMainAcc(), "elton.tsai@hotmail.com");
 		 System.out.println("The following users from MSN are online: ");
 		 for(int i = 0; i < onlineUsersMSN.size(); i++){
 			 System.out.println(onlineUsersMSN.get(i));
 		 }
 		 System.out.println("================================================ ");
 		 
-			Map<String, userInfo> ous = onlineUsersSingleton.getInstance();
+	/*		Map<String, userInfo> ous = onlineUsersSingleton.getInstance();
 			Collection collection = ous.values();
 			Iterator iterator = collection.iterator();
 			System.out.println("List");

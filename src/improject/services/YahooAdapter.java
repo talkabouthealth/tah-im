@@ -141,4 +141,5 @@ public class YahooAdapter extends AbstractServiceAdapter {
 
 		return onlineContacts;
 	}
+
 }
