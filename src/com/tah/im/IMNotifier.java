@@ -40,6 +40,7 @@ public class IMNotifier {
 		//add message listener(s) for all service
 		session.addMessageListener(new MessageListener() {
 			  @Override
+			  // Automatically reply incoming message.
 			  public void messageReceived(Message message) {
 		          // Print received message
 				  System.out.println("Message received:");
@@ -54,7 +55,7 @@ public class IMNotifier {
 				
 				  // Send reply to the same service/user it came from
 					System.out.println("Sending reply...\n");
-	
+					// Create msg content
 					String chatroomUrl;
 					chatroomUrl = " http://talkabouthealth.com/talk12 ";
 					Message replyMessage = new Message();
@@ -62,7 +63,7 @@ public class IMNotifier {
 					replyMessage.setBody("Thank you for starting a conversation. Click on this link to start the conversation: " + chatroomUrl);
 					replyMessage.setFrom(message.getTo());
 					replyMessage.setTo(message.getFrom());
-		
+					// Reply message.
 					try {
 						session.sendMessage(replyMessage);
 					} catch (IMException e) {
@@ -70,22 +71,27 @@ public class IMNotifier {
 					}
 			  }
 		});
-		
+		// Automatically update onlineuserlist when users change their status.
 		session.addUserListener(new UserListener(){
 
 			@Override
 			public void statusChanged(String user, String newStatus){
 				// TODO Auto-generated method stub
+				// Get rid of unnecessary information
 				int end = user.indexOf("/");
 				String userMail = user.substring(0, end);
-
+				// If user changes status to ONLINE
 				if(newStatus.equals("available")){
+					// If userMail is NOTn onlineuserlist
 					if(!onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
 						try {
+							// Get user information from Database (talkmi.talkers)
 							userInfo _user = new userInfo(userMail);
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE");
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE" + _user.isExist(userMail));
+							// Check if user is our member.
 							if(_user.isExist(userMail)){
+								// Add user into online user list.
 								onlineUserInfo.addOnlineUser(userMail, _user);	
 								System.out.println(onlineUserInfo);
 								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is added in to online user list");
@@ -99,18 +105,19 @@ public class IMNotifier {
 						}
 					}
 				}
+				// If user changes status to OFFLINE
 				else{
+					// Check if user is in the onlineuserlist
 					if(onlineUserInfo.getOnlineUserMap().containsKey(userMail)){ 
+						// Remove from onlinuserlist
 						onlineUserInfo.removeOnlineUser(userMail);
 						System.out.println(userMail + " is removed from list");
 					}
 				}
-//				Map<String, userInfo> oui = onlineUsersSingleton.getInstance();
+				// Create Iterator to print out all online users.
 				Collection collection = onlineUserInfo.getOnlineUserMap().values();
 				Iterator iterator = collection.iterator();
-				java.util.Date date= new java.util.Date();
-				String period;
-				System.out.println("************************All online user list*************************" + onlineUserInfo + " Google");
+				System.out.println("************************All online user list*************************");
 				while(iterator.hasNext()){
 					userInfo uI = (userInfo) iterator.next();							
 					System.out.println(uI.getUname() + " is online");

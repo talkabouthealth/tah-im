@@ -11,14 +11,10 @@ public class dbConnection {
 	private String db_user;
 	private String db_password;
 	private Connection con;
-	private String uname;
-	private String email;
 	private Statement stmt;
-	private ResultSet rs;
-	private int rows;
-	
+	private ResultSet rs;	
 
-    
+    // Constructor
     public dbConnection() throws SQLException {
         
         // TODO Auto-generated constructor stub
@@ -41,53 +37,17 @@ public class dbConnection {
         stmt = con.createStatement();
         setRs(_sql);
     }
-
-	public void getUserList() throws SQLException {
-		// TODO Auto-generated method stub
-
-
-		
-		System.out.println();
-		System.out.println("Listing User Info......");
-		while(rs.next()){
-			setUname(rs.getObject("uname").toString());
-			setUname(rs.getObject("email").toString());
-			System.out.println(rs.getObject("uname") + " has account of " + rs.getObject("email"));
-		}
-	}
-	
+	// Return connection 
 	public Connection getCon(){
 		return con;
 	}
-
-	public void setUname(String uname) {
-		this.uname = uname;
-	}
-
-
-	public String getUname() {
-		return uname;
-	}
-
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-
-	public String getEmail() {
-		return email;
-	}
-
+	// Setting resultset
 	public void setRs(String _sqlStmt) throws SQLException{
 		rs =  stmt.executeQuery(_sqlStmt);	
 	}
+	// Return resultset
 	public ResultSet getRs(){
 		return rs;
-	}
-	public int getRows() throws SQLException{
-		rows = rs.getRow();
-		return rows;
 	}
 
 }

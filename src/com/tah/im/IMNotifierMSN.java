@@ -40,6 +40,7 @@ public class IMNotifierMSN  {
 		//add message listener(s) for all service
 		session.addMessageListener(new MessageListener() {
 			  @Override
+			  // Automatically reply incoming message.
 			  public void messageReceived(Message message) {
 		          // Print received message
 				  System.out.println("Message received:");
@@ -70,29 +71,30 @@ public class IMNotifierMSN  {
 					}
 			  }
 		});
-		
+		// Automatically update onlineuserlist when users change their status.
 		session.addUserListener (new UserListener () {
 
 			@Override
 			public void statusChanged(String user, String newStatus) {
-				int i = 0;
 				// TODO Auto-generated method stub
-	//			int end = user.indexOf("/");
 				String userMail = user;
 				System.out.println(userMail + " is " + newStatus);
+				// If user changes status to ONLINE
 				if(newStatus.equals("ONLINE")){
+					// If userMail is NOTn onlineuserlist
 					if(!onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
 						try {
+							// Get user information from Database (talkmi.talkers)
 							userInfo _user = new userInfo(userMail);
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE");
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE" + _user.isExist(userMail));
+							// Check if user is our member.
 							if(_user.isExist(userMail)){
+								// Add user into online user list.
 								onlineUserInfo.addOnlineUser(userMail, _user);		
-								System.out.println(onlineUserInfo);
 								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is added in to online user list");
 							} else{
 								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is not exist.");
-								System.out.println(onlineUserInfo);
 							}
 							
 						} catch (SQLException e1) {
@@ -103,18 +105,21 @@ public class IMNotifierMSN  {
 					}
 
 				}
+				// If user changes status to OFFLINE
 				else{
+					// Check if user is in the onlineuserlist
 					if(onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
-						System.out.println(onlineUserInfo.getOnlineUser(userMail).getUname() + " is removing from list");
+						// Remove from onlinuserlist
 						onlineUserInfo.removeOnlineUser(userMail);
 						System.out.println(userMail + " is removed from list");
 					}
 				}
+				// Create Iterator to print out all online users.
 				Collection collection = onlineUserInfo.getOnlineUserMap().values();
 				Iterator iterator = collection.iterator();
 				java.util.Date date= new java.util.Date();
 				String period;
-				System.out.println("************************All online user list*************************" + onlineUserInfo + " MSN");
+				System.out.println("************************All online user list*************************");
 				while(iterator.hasNext()){
 					userInfo uI = (userInfo) iterator.next();							
 					System.out.println(uI.getUname() + " is online");

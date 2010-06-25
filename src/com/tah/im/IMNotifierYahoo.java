@@ -39,6 +39,7 @@ public class IMNotifierYahoo {
 		//add message listener(s) for all service
 		session.addMessageListener(new MessageListener() {
 			  @Override
+			  // Automatically reply incoming message.
 			  public void messageReceived(Message message) {
 		          // Print received message
 				  System.out.println("Message received:");
@@ -69,7 +70,7 @@ public class IMNotifierYahoo {
 					}
 			  }
 		});
-		
+		// Automatically update onlineuserlist when users change their status.
 		session.addUserListener(new UserListener(){
 
 			@Override
@@ -78,15 +79,19 @@ public class IMNotifierYahoo {
 
 				String userMail = user + "@yahoo.com";
 				System.out.println(userMail + " is " + newStatus);
+				// If user changes status to ONLINE
 				if(newStatus.equals("AVAILABLE")){
+					// If userMail is NOTn onlineuserlist
 					if(!onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
 						try {
 							userInfo _user = new userInfo(userMail);
+							// Get user information from Database (talkmi.talkers)
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE");
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE" + _user.isExist(userMail));
+							// Check if user is our member.
 							if(_user.isExist(userMail)){
+								// Add user into online user list.
 								onlineUserInfo.addOnlineUser(userMail, _user);	
-								System.out.println(onlineUserInfo);
 								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is added in to online user list");
 							} else{
 								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is not exist.");
@@ -96,21 +101,23 @@ public class IMNotifierYahoo {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-	
 					}
-
 				}
+				// If user changes status to OFFLINE
 				else{
+					// Check if user is in the onlineuserlist
 					if(onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
+						// Remove from onlinuserlist
 						onlineUserInfo.removeOnlineUser(userMail);
 						System.out.println(userMail + " is removed from list");
 					}
 				}
+				// Create Iterator to print out all online users.
 				Collection collection = onlineUserInfo.getOnlineUserMap().values();
 				Iterator iterator = collection.iterator();
 				java.util.Date date= new java.util.Date();
 				String period;
-				System.out.println("************************All online user list*************************" + onlineUserInfo + " Yahoo");
+				System.out.println("************************All online user list*************************");
 				while(iterator.hasNext()){
 					userInfo uI = (userInfo) iterator.next();							
 					System.out.println(uI.getUname() + " is online");
