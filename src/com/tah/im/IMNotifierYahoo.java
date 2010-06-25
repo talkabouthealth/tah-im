@@ -78,7 +78,6 @@ public class IMNotifierYahoo {
 				// TODO Auto-generated method stub
 
 				String userMail = user + "@yahoo.com";
-				System.out.println(userMail + " is " + newStatus);
 				// If user changes status to ONLINE
 				if(newStatus.equals("AVAILABLE")){
 					// If userMail is NOTn onlineuserlist
@@ -87,14 +86,13 @@ public class IMNotifierYahoo {
 							userInfo _user = new userInfo(userMail);
 							// Get user information from Database (talkmi.talkers)
 							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE");
-							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE" + _user.isExist(userMail));
 							// Check if user is our member.
 							if(_user.isExist(userMail)){
 								// Add user into online user list.
 								onlineUserInfo.addOnlineUser(userMail, _user);	
 								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is added in to online user list");
 							} else{
-								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is not exist.");
+								System.out.println(userMail + "(" + userMail + ") does not exist.");
 							}
 
 						} catch (SQLException e1) {
