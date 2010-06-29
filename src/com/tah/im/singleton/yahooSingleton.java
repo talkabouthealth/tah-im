@@ -28,4 +28,8 @@ public class yahooSingleton{
 	public boolean Broadcast(final String[] mail_list, int[] UID, int _tid) throws Exception{
 		return myahooSingleton.Broadcast(mail_list, UID, _tid);
 	}
+	
+	public void addContact(String contactEmail) throws Exception {
+		myahooSingleton.addContact(contactEmail);
+	}
 }

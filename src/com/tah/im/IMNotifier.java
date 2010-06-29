@@ -231,5 +231,8 @@ public class IMNotifier {
 			
 	}//end of Broadcast
 	
+	public void addContact(String contactEmail) throws Exception {
+		session.addContact(MainAccount, contactEmail);
+	}
 
 }

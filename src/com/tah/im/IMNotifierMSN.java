@@ -233,5 +233,7 @@ public class IMNotifierMSN  {
 			
 	}//end of Broadcast
 	
-
+	public void addContact(String contactEmail) throws Exception {
+		session.addContact(MainAccount, contactEmail);
+	}
 }
