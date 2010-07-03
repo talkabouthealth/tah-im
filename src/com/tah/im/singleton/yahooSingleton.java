@@ -25,7 +25,7 @@ public class yahooSingleton{
 	public String getMainAcc(){
 		return myahooSingleton.getMainAcc();
 	}
-	public boolean Broadcast(final String[] mail_list, int[] UID, int _tid) throws Exception{
+	public boolean Broadcast(final String[] mail_list, String[] UID, String _tid) throws Exception{
 		return myahooSingleton.Broadcast(mail_list, UID, _tid);
 	}
 	

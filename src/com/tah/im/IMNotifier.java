@@ -7,17 +7,10 @@ import improject.MessageListener;
 import improject.UserListener;
 import improject.IMSession.IMService;
 
-
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import com.tah.im.singleton.onlineUsersSingleton;
-
 
 
 public class IMNotifier {
@@ -97,7 +90,7 @@ public class IMNotifier {
 								System.out.println(userMail + "(" + userMail + ") does not exist.");
 							}
 
-						} catch (SQLException e1) {
+						} catch (Exception e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
@@ -170,7 +163,7 @@ public class IMNotifier {
 		return MainAccount;
 	}
 	
-	public boolean Broadcast(final String[] mail_list, int[] UID, int _tid) throws Exception {
+	public boolean Broadcast(final String[] mail_list, String[] UID, String _tid) throws Exception {
 		
 		int count =0; //counts of successful sending
 		
@@ -193,9 +186,6 @@ public class IMNotifier {
 		
 		//Sending Message
 		try {
-				//Link to DB
-				SQL_CON SQL_Conn = new SQL_CON();
-				
 				for(int i = 0; i < mail_list.length; i++){
 					if(session.isOnline(MainAccount, mail_list[i])){
 						System.out.println(mail_list[i] + " is online. Send messages to it");
@@ -206,22 +196,20 @@ public class IMNotifier {
 						count++;
 						//record in DB
 						try {
-							SQL_Conn.InsertToNoti(UID[i],_tid,1);
-						} catch (SQLException e) {
+							DBUtil.saveNotification(UID[i], _tid, 1);
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
 					else{
 						try {
-							SQL_Conn.InsertToNoti(UID[i],_tid,0);
-						} catch (SQLException e){
+							DBUtil.saveNotification(UID[i], _tid, 0);
+						} catch (Exception e){
 							e.printStackTrace();
 						}
 					}
 				}
 								
-				SQL_Conn.CloseLink();  //close DB
-				
 		} catch (IMException e) {
 			e.printStackTrace();
 		}
