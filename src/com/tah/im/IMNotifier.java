@@ -2,124 +2,125 @@ package com.tah.im;
 
 import improject.IMException;
 import improject.IMSession;
+import improject.LoginInfo;
 import improject.Message;
 import improject.MessageListener;
 import improject.UserListener;
 import improject.IMSession.IMService;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
-import com.tah.im.singleton.onlineUsersSingleton;
+import sun.security.jca.GetInstance;
 
+import com.tah.im.singleton.OnlineUsersSingleton;
 
+//TODO: make good logging?
 public class IMNotifier {
+	
+	private static IMNotifier instance;
 
+	//TODO: get this from constructor?
+	LoginInfo[] loginInfoArray = new LoginInfo[] {
+//		new LoginInfo(IMService.GOOGLE, "talkabouthealth.com@gmail.com", "CarrotCake917"),
+//		new LoginInfo(IMService.MSN, "talkabouthealth.com@live.com", "CarrotCake917"),
+//		new LoginInfo(IMService.YAHOO, "talkabouthealth@ymail.com", "CarrotCake917"),
+		
+		new LoginInfo(IMService.GOOGLE, "talkabouthealth.com.test@gmail.com", "CarrotCake917"),
+		new LoginInfo(IMService.MSN, "talkabouthealth.com.test@hotmail.com", "CarrotCake917"),
+		new LoginInfo(IMService.YAHOO, "talkabouthealthtest@ymail.com", "CarrotCake917"),
+	};
+	Map<IMService, LoginInfo> loginInfoMap;
+	
 	private IMSession session;
-	private String MainAccount;
-	private String MainPasswd;
-	private onlineUsersSingleton onlineUserInfo = onlineUsersSingleton.getInstance();
+	private OnlineUsersSingleton onlineUserInfo = OnlineUsersSingleton.getInstance();
+	
+	public static IMNotifier getInstance() {
+		if (instance == null) {
+			instance = new IMNotifier();
+		}
+		return instance;
+	}
 
-	//Constructor: login when creating the IMInterface
-	public IMNotifier(){
-		//login by this account		
-		this.MainAccount = "talkabouthealth.com@gmail.com";
-		this.MainPasswd = "CarrotCake917";
+	private IMNotifier() {
+		session = new IMSession();
 		
-		this.session = new IMSession();
+		loginInfoMap = new HashMap<IMSession.IMService, LoginInfo>();
+		for (LoginInfo loginInfo : loginInfoArray) {
+			session.addLogin(loginInfo.getImService(), loginInfo.getUser(), loginInfo.getPassword());
+			loginInfoMap.put(loginInfo.getImService(), loginInfo);
+		}
 		
-		session.addLogin(IMService.GOOGLE, MainAccount, MainPasswd);
-		
-		//add message listener(s) for all service
+		// add message listener(s) for all service
 		session.addMessageListener(new MessageListener() {
-			  @Override
-			  // Automatically reply incoming message.
-			  public void messageReceived(Message message) {
-		          // Print received message
-				  System.out.println("Message received:");
-				  System.out.println(message);
-						
-		          // Discover & print user "online?" status
-				  try {
-					  System.out.println("User is online? " + session.isOnline(message.getTo(), message.getFrom()));
-				  } catch (IMException e) {
-					  e.printStackTrace();
-				  }
+			@Override
+			// Automatically reply incoming message.
+			public void messageReceived(Message message) {
+				System.out.println("Message received:\n" + message);
+
+				// Send reply to the same service/user it came from
+				System.out.println("Sending reply...");
 				
-				  // Send reply to the same service/user it came from
-					System.out.println("Sending reply...\n");
-					// Create msg content
-					String chatroomUrl;
-					chatroomUrl = " http://talkabouthealth.com/talk12 ";
-					Message replyMessage = new Message();
-					replyMessage.setImService(message.getImService());
-					replyMessage.setBody("Thank you for starting a conversation. Click on this link to start the conversation: " + chatroomUrl);
-					replyMessage.setFrom(message.getTo());
-					replyMessage.setTo(message.getFrom());
-					// Reply message.
-					try {
-						session.sendMessage(replyMessage);
-					} catch (IMException e) {
-						e.printStackTrace();
-					}
-			  }
+				// Create msg content
+				String chatRoomURL = "http://talkabouthealth.com/talk12";
+				Message replyMessage = new Message();
+				replyMessage.setImService(message.getImService());
+				replyMessage
+						.setBody("Thank you for starting a conversation. Click on this link to start the conversation: "
+								+ chatRoomURL);
+				replyMessage.setFrom(message.getTo());
+				replyMessage.setTo(message.getFrom());
+				
+				try {
+					session.sendMessage(replyMessage);
+				} catch (IMException e) {
+					//TODO: handle errors correctly?
+					e.printStackTrace();
+				}
+			}
 		});
+		
 		// Automatically update onlineuserlist when users change their status.
-		session.addUserListener(new UserListener(){
+		session.addUserListener(new UserListener() {
 
 			@Override
-			public void statusChanged(String user, String newStatus){
-				// TODO Auto-generated method stub
-				// Get rid of unnecessary information
-				int end = user.indexOf("/");
-				String userMail = user.substring(0, end);
+			public void statusChanged(String user, String newStatus) {
+				UserInfo userInfo = getUserInfo(user);
+				
 				// If user changes status to ONLINE
-				if(newStatus.equals("available")){
-					// If userMail is NOTn onlineuserlist
-					if(!onlineUserInfo.getOnlineUserMap().containsKey(userMail)){
+				if (newStatus.equalsIgnoreCase("available") || newStatus.equalsIgnoreCase("online")) {
+					if (!onlineUserInfo.isUserOnline(userInfo.getUid())) {
 						try {
-							// Get user information from Database (talkmi.talkers)
-							userInfo _user = new userInfo(userMail);
-							System.out.println(userMail + "(" + _user.getUname() + ") is now ONLINE");
-							// Check if user is our member.
-							if(_user.isExist(userMail)){
-								// Add user into online user list.
-								onlineUserInfo.addOnlineUser(userMail, _user);
-								System.out.println(userMail + "(" + onlineUserInfo.getOnlineUser(userMail).getUname() + ") is added in to online user list");
-							} else{
-								System.out.println(userMail + "(" + userMail + ") does not exist.");
-							}
+							// Get user information from Database
+							System.out.println(userInfo + " is now ONLINE");
 
+							// Check if user is our member.
+							if (userInfo.isExist()) {
+								// Add user into online user list.
+								onlineUserInfo.addOnlineUser(userInfo.getUid(), userInfo);
+								System.out.println(userInfo + " is added in to online user list");
+							} else {
+								System.out.println(userInfo + " does not exist.");
+							}
 						} catch (Exception e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					}
 				}
 				// If user changes status to OFFLINE
-				else{
-					// Check if user is in the onlineuserlist
-					if(onlineUserInfo.getOnlineUserMap().containsKey(userMail)){ 
-						// Remove from onlinuserlist
-						onlineUserInfo.removeOnlineUser(userMail);
-						System.out.println(userMail + " is removed from list");
+				else {
+					if (onlineUserInfo.isUserOnline(userInfo.getUid())) {
+						onlineUserInfo.removeOnlineUser(userInfo.getUid());
+						System.out.println(userInfo + " is removed from list");
 					}
 				}
-				// Create Iterator to print out all online users.
-				Collection collection = onlineUserInfo.getOnlineUserMap().values();
-				Iterator iterator = collection.iterator();
-				System.out.println("************************All online user list*************************");
-				while(iterator.hasNext()){
-					userInfo uI = (userInfo) iterator.next();							
-					System.out.println(uI.getUname() + " is online");
-				}
-				System.out.println("**********************************************************************");
+				onlineUserInfo.printAll();
 			}
-			
+
 		});
 		
-		
-		//connect 
 		try { 
 			session.connect();
 		} catch (IMException e) {
@@ -140,27 +141,47 @@ public class IMNotifier {
             }        
         }); 
 		thread.start();		
-		try { 
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+	}
+	
+	//convert user (format of IMService) to UserInfo with data form TAH db
+	private UserInfo getUserInfo(String user) {
+		if (user == null) {
+			return null;
 		}
-	}
-
-	public boolean isUserOnline(String email) throws Exception{
-
-		if(this.session.isOnline(MainAccount, email )){
-			System.out.println( email + " is online");
-			return true;
-		} else {
-			return false;
+		
+		//'YahooIM', 'WindowLive', 'GoogleTalk'
+		String imService = null;
+		String imUsername = null;
+		if (user.contains("@gmail")) {
+			//Google service
+			imService = "GoogleTalk";
+			imUsername = user;
+			int end = user.indexOf("@");
+			if (end != -1) {
+				imUsername.substring(0, end);
+			}
 		}
+		else if (user.contains("@live") || user.contains("@hotmail")) {
+			imService = "WindowLive";
+			imUsername = user;
+			int end = user.indexOf("@");
+			if (end != -1) {
+				imUsername.substring(0, end);
+			}
+		}
+		else {
+			//for now default - Yahoo
+			imService = "YahooIM";
+			imUsername = user;
+		}
+		
+		UserInfo userInfo = DBUtil.getUserByIm(imService, imUsername);
+		return userInfo;
 	}
-	public IMSession getSession(){
-		return session;
-	}
-	public String getMainAcc(){
-		return MainAccount;
+	
+	public void addContact(String imService, String imUsername) throws Exception {
+		//TODO finish it?
+//		session.addContact(MainAccount, imUsername);
 	}
 	
 	public boolean Broadcast(final String[] mail_list, String[] UID, String _tid) throws Exception {
@@ -176,7 +197,9 @@ public class IMNotifier {
 		Message bMessage = new Message();
 		bMessage.setImService(IMService.GOOGLE);
 		bMessage.setBody("No link. Try it later.");  //default message
-		bMessage.setFrom(this.MainAccount);
+		
+		//TODO: finish this!
+		bMessage.setFrom(null);
 		
 		try { 
 			Thread.sleep(5000);
@@ -187,7 +210,8 @@ public class IMNotifier {
 		//Sending Message
 		try {
 				for(int i = 0; i < mail_list.length; i++){
-					if(session.isOnline(MainAccount, mail_list[i])){
+					//TODO: finish this!
+					if(session.isOnline("Main Account", mail_list[i])){
 						System.out.println(mail_list[i] + " is online. Send messages to it");
 						bMessage.setTo(mail_list[i]);
 						bMessage.setBody(des + url + UID[i]);
@@ -201,7 +225,7 @@ public class IMNotifier {
 							e.printStackTrace();
 						}
 					}
-					else{
+					else {
 						try {
 							DBUtil.saveNotification(UID[i], _tid, 0);
 						} catch (Exception e){
@@ -219,8 +243,4 @@ public class IMNotifier {
 			
 	}//end of Broadcast
 	
-	public void addContact(String contactEmail) throws Exception {
-		session.addContact(MainAccount, contactEmail);
-	}
-
 }

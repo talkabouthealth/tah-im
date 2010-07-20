@@ -1,15 +1,26 @@
 package com.tah.im;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import improject.Message;
-import improject.IMSession.IMService;
+import net.sf.jml.MsnMessenger;
+import net.sf.jml.MsnProtocol;
+import net.sf.jml.event.MsnMessengerAdapter;
+import net.sf.jml.impl.MsnMessengerFactory;
 
 public class testIM {
 	public static void main(String[] args) throws Exception {
+		IMNotifier imNotifier = IMNotifier.getInstance();
+		
+		Thread.sleep(5000);
+		
+		System.err.println("---");
+		
+//		imNotifier.addContact("kan.kangaroo");
+		
+//		System.out.println(imNotifier.isUserOnline("kan.kangaroo@hotmail.com"));
+		
+		
+
+        
+		
 		/*String[][] data_list = {{"thero666@gmail.com", "talkabouthealth.com@gmail.com"}, 
                 {"http://yahoo.com", "http://www.google.com"}};
 		*/

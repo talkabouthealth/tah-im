@@ -12,6 +12,7 @@ import net.sf.jml.MsnConnection;
 import net.sf.jml.MsnContact;
 import net.sf.jml.MsnContactList;
 import net.sf.jml.MsnMessenger;
+import net.sf.jml.MsnProtocol;
 import net.sf.jml.MsnSwitchboard;
 import net.sf.jml.MsnUserStatus;
 import net.sf.jml.event.MsnAdapter;
@@ -72,6 +73,7 @@ public class MSNAdapter extends AbstractServiceAdapter {
 		
 		messenger.addMessageListener(adapter);
 		messenger.addContactListListener(adapter);
+		
 		messenger.login();
 	}
 	
@@ -90,6 +92,7 @@ public class MSNAdapter extends AbstractServiceAdapter {
 		try {
 			messenger.sendText(Email.parseStr(message.getTo()), message.getBody());
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IMException(e.getMessage());
 		}
 	}

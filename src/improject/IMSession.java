@@ -70,11 +70,9 @@ public class IMSession implements MessageListener, UserListener {
 			imService.connect();
 			
 			//save serviceAdapters for future use
-			String sid = loginInfo.getUser() + serviceAdapterToString(loginInfo.getImService());
-			System.out.println("sid is " + sid);
+//			String sid = loginInfo.getUser() + serviceAdapterToString(loginInfo.getImService());
+			String sid = loginInfo.getUser();
 			serviceAdapters.put(sid, imService);
-			serviceAdapters.put(loginInfo.getUser(), imService);
-			System.out.println("imService of dis is " + serviceAdapters.get(sid));
 			connectTimes.put(sid,new Long(System.currentTimeMillis()/1000));
 			disconnectTimes.put(sid,new Long(-1));
 		}
@@ -83,7 +81,8 @@ public class IMSession implements MessageListener, UserListener {
 	public void checkConnections() {
 		for (LoginInfo loginInfo : logins) {
 			//save serviceAdapters for future use
-			String sid = loginInfo.getUser() + serviceAdapterToString(loginInfo.getImService());
+//			String sid = loginInfo.getUser() + serviceAdapterToString(loginInfo.getImService());
+			String sid = loginInfo.getUser();
 			ServiceAdapter imService = serviceAdapters.get(sid);
 			
 			//try restarting dead connections
@@ -116,26 +115,27 @@ public class IMSession implements MessageListener, UserListener {
 	public void disconnect() throws IMException {
 		for (LoginInfo loginInfo : logins) {
 			//save serviceAdapters for future use
-			String sid = loginInfo.getUser() + serviceAdapterToString(loginInfo.getImService());			
+//			String sid = loginInfo.getUser() + serviceAdapterToString(loginInfo.getImService());			
+			String sid = loginInfo.getUser();
 			ServiceAdapter imService = serviceAdapters.get(sid);
 			imService.disconnect();	
 		}		
 	}
 	
-	private String serviceAdapterToString(IMService service) {
-		switch (service) {
-		case YAHOO:
-			return "@YAHOO";
-		case MSN:
-			return "@MSN";
-		case GOOGLE:
-			return "@GOOGLE";
-		case SKYPE:
-			return "@SKYPE";
-		default: 
-			throw new IllegalArgumentException();
-		}		
-	}
+//	private String serviceAdapterToString(IMService service) {
+//		switch (service) {
+//		case YAHOO:
+//			return "@YAHOO";
+//		case MSN:
+//			return "@MSN";
+//		case GOOGLE:
+//			return "@GOOGLE";
+//		case SKYPE:
+//			return "@SKYPE";
+//		default: 
+//			throw new IllegalArgumentException();
+//		}		
+//	}
 	
 	private ServiceAdapter createServiceAdapter(LoginInfo loginInfo) {
 		switch (loginInfo.getImService()) {
@@ -176,9 +176,6 @@ public class IMSession implements MessageListener, UserListener {
 	 */	
 	public boolean isOnline(String sessionOwner, String contact) throws IMException {
 		ServiceAdapter imService = serviceAdapters.get(sessionOwner);
-		System.out.println(sessionOwner);
-		System.out.println("imService of sessionOwner is " + imService);
-		System.out.println("Is " + contact + " online?");
 		return imService.isOnline(contact);
 	}
 

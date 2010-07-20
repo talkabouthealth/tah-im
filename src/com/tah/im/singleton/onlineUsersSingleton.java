@@ -3,29 +3,42 @@ package com.tah.im.singleton;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tah.im.userInfo;
+import com.tah.im.UserInfo;
 
-public class onlineUsersSingleton{
-	private static onlineUsersSingleton _onlineUsersSingleton = new onlineUsersSingleton();
-	private Map<String, userInfo> monlineUsersSingleton = new HashMap<String, userInfo>();
+public class OnlineUsersSingleton {
+	private static OnlineUsersSingleton _onlineUsersSingleton = new OnlineUsersSingleton();
+	private Map<String, UserInfo> onlineUsersMap = new HashMap<String, UserInfo>();
 
-	private onlineUsersSingleton(){
-	//	_instance = new IMNotifier();
-		System.out.println("OnlineUsers Singleton");
-	}
-	public static onlineUsersSingleton getInstance(){
+	private OnlineUsersSingleton() {}
+
+	public static OnlineUsersSingleton getInstance() {
 		return _onlineUsersSingleton;
 	}
-	public void removeOnlineUser(String _mail){
-		monlineUsersSingleton.remove(_mail);	
+
+	public void removeOnlineUser(String email) {
+		onlineUsersMap.remove(email);
 	}
-	public void addOnlineUser(String _mail, userInfo _uInfo){
-		monlineUsersSingleton.put(_mail, _uInfo);	
+
+	public void addOnlineUser(String email, UserInfo userInfo) {
+		onlineUsersMap.put(email, userInfo);
 	}
-	public userInfo getOnlineUser(String _mail){
-		return monlineUsersSingleton.get(_mail);
+
+	public UserInfo getOnlineUser(String email) {
+		return onlineUsersMap.get(email);
 	}
-	public Map<String, userInfo> getOnlineUserMap(){
-		return monlineUsersSingleton;
+	
+	public boolean isUserOnline(String email) {
+		return onlineUsersMap.get(email) != null;
+	}
+
+	public Map<String, UserInfo> getOnlineUserMap() {
+		return onlineUsersMap;
+	}
+
+	public void printAll() {
+		System.out.println("--------- Online Users -------------");
+		for (String user : onlineUsersMap.keySet()) {
+			System.out.println(user + " : "+onlineUsersMap.get(user));
+		}
 	}
 }
