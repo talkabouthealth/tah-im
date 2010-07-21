@@ -39,22 +39,53 @@ private static Mongo mongo;
 		
 		DBObject query = new BasicDBObject();
 		query.put("im", imService);
-		query.put("imUsername", imUsername);
+		query.put("im_uname", imUsername);
 		DBObject talkerDBObject = talkersColl.findOne(query);
 		
-		UserInfo userInfo = new UserInfo(imService, imUsername);
-		if (talkerDBObject != null) {
-			userInfo.setUid(talkerDBObject.get("_id").toString());
-			userInfo.setUname((String)talkerDBObject.get("uname"));
-			userInfo.setEmail((String)talkerDBObject.get("email"));
-			userInfo.setGender((String)talkerDBObject.get("gender"));
-		}
+		UserInfo userInfo = new UserInfo();
+		userInfo.parseDBInfo(talkerDBObject);
+		
+		//it's possible that we don't have such IM username in db,
+		//so we return UserInfo only with IM data
+		userInfo.setImService(imService);
+		userInfo.setImUsername(imUsername);
 		
 		return userInfo;
 	}
 	
+	public static UserInfo getUserById(String talkerId) {
+		DBCollection talkersColl = getDB().getCollection("talkers");
+		
+		DBObject query = new BasicDBObject("_id", new ObjectId(talkerId));
+		DBObject talkerDBObject = talkersColl.findOne(query);
+		
+		UserInfo userInfo = new UserInfo();
+		userInfo.parseDBInfo(talkerDBObject);
+		
+		return userInfo;
+	}
+	
+	/* ------ Topics ------ */
+	public static String createTopic(String talkerId, String topicName) {
+		DBCollection topicsColl = getDB().getCollection("topics");
+		
+		Date now = new Date();
+		
+		DBRef talkerRef = new DBRef(DBUtil.getDB(), "talkers", new ObjectId(talkerId));
+		DBObject topicObject = BasicDBObjectBuilder.start()
+			.add("uid", talkerRef)
+			.add("topic", topicName)
+			.add("cr_date", now)
+			.add("disp_date", now)
+			.get();
+
+		topicsColl.save(topicObject);
+		return topicObject.get("_id").toString();
+	}
+	
+	
 	/* ---- Notifications ----- */
-	public static void saveNotification(String uid, String topicId, int sc) {
+	public static void saveNotification(String uid, String topicId) {
 		DBCollection notificationsColl = getDB().getCollection("notifications");
 		
 		DBRef talkerRef = new DBRef(getDB(), "talkers", new ObjectId(uid));
@@ -63,7 +94,6 @@ private static Mongo mongo;
 			.add("uid", talkerRef)
 			.add("topic_id", topicRef)
 			.add("time", new Date())
-			.add("sc", sc)
 			.get();
 		
 		notificationsColl.save(notificationDBObject);

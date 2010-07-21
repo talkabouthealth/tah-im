@@ -1,28 +1,27 @@
 package improject.services;
 
 import improject.IMException;
+import improject.IMSession.IMService;
 import improject.LoginInfo;
 import improject.Message;
-import improject.IMSession.IMService;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.Roster.SubscriptionMode;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.Roster.SubscriptionMode;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smack.packet.XMPPError;
 
 /**
  * Service adapter for Google IM (GTalk). Implemented using Smack API (http://www.igniterealtime.org/projects/smack/index.jsp)
@@ -157,10 +156,8 @@ public class GoogleAdapter extends AbstractServiceAdapter {
 		*/
 		if(connection.getRoster().getEntry(contact) != null){
 			try {
-				Collection collection =  connection.getRoster().getEntries();
-				Iterator iterator = collection.iterator();
-				while(iterator.hasNext()){
-					RosterEntry rosterEntry = (RosterEntry) iterator.next();
+				Collection<RosterEntry> collection =  connection.getRoster().getEntries();
+				for (RosterEntry rosterEntry : collection) {
 					System.out.println(rosterEntry);
 				}
 				connection.getRoster().removeEntry(connection.getRoster().getEntry(contact));

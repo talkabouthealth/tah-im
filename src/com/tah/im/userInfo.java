@@ -1,5 +1,7 @@
 package com.tah.im;
 
+import com.mongodb.DBObject;
+
 
 public class UserInfo {
 
@@ -18,6 +20,18 @@ public class UserInfo {
 		super();
 		this.imService = imService;
 		this.imUsername = imUsername;
+	}
+	
+	public void parseDBInfo(DBObject talkerDBObject) {
+		if (talkerDBObject != null) {
+			setUid(talkerDBObject.get("_id").toString());
+			setUname((String)talkerDBObject.get("uname"));
+			setEmail((String)talkerDBObject.get("email"));
+			setGender((String)talkerDBObject.get("gender"));
+			
+			setImService((String)talkerDBObject.get("im"));
+			setImUsername((String)talkerDBObject.get("im_uname"));
+		}
 	}
 	
 	public boolean isExist() {

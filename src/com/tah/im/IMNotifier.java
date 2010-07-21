@@ -2,49 +2,35 @@ package com.tah.im;
 
 import improject.IMException;
 import improject.IMSession;
+import improject.IMSession.IMService;
 import improject.LoginInfo;
 import improject.Message;
 import improject.MessageListener;
 import improject.UserListener;
-import improject.IMSession.IMService;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-
-import sun.security.jca.GetInstance;
 
 import com.tah.im.singleton.OnlineUsersSingleton;
 
 //TODO: make good logging?
 public class IMNotifier {
 	
+	public static final String CHAT_URL = "http://talkabouthealth.com:9000/chat/";
 	private static IMNotifier instance;
 
-	//TODO: get this from constructor?
-	LoginInfo[] loginInfoArray = new LoginInfo[] {
-//		new LoginInfo(IMService.GOOGLE, "talkabouthealth.com@gmail.com", "CarrotCake917"),
-//		new LoginInfo(IMService.MSN, "talkabouthealth.com@live.com", "CarrotCake917"),
-//		new LoginInfo(IMService.YAHOO, "talkabouthealth@ymail.com", "CarrotCake917"),
-		
-		new LoginInfo(IMService.GOOGLE, "talkabouthealth.com.test@gmail.com", "CarrotCake917"),
-		new LoginInfo(IMService.MSN, "talkabouthealth.com.test@hotmail.com", "CarrotCake917"),
-		new LoginInfo(IMService.YAHOO, "talkabouthealthtest@ymail.com", "CarrotCake917"),
-	};
-	Map<IMService, LoginInfo> loginInfoMap;
-	
+	private Map<IMService, LoginInfo> loginInfoMap;
 	private IMSession session;
 	private OnlineUsersSingleton onlineUserInfo = OnlineUsersSingleton.getInstance();
 	
-	public static IMNotifier getInstance() {
+	public static IMNotifier getInstance(LoginInfo[] loginInfoArray) {
 		if (instance == null) {
-			instance = new IMNotifier();
+			instance = new IMNotifier(loginInfoArray);
 		}
 		return instance;
 	}
 
-	private IMNotifier() {
+	private IMNotifier(LoginInfo[] loginInfoArray) {
 		session = new IMSession();
 		
 		loginInfoMap = new HashMap<IMSession.IMService, LoginInfo>();
@@ -60,16 +46,17 @@ public class IMNotifier {
 			public void messageReceived(Message message) {
 				System.out.println("Message received:\n" + message);
 
-				// Send reply to the same service/user it came from
-				System.out.println("Sending reply...");
+				// Create topic with given topic name
+				UserInfo userInfo = getUserInfo(message.getFrom());
+				System.out.println("User: "+userInfo);
+				String topicId = DBUtil.createTopic(userInfo.getUid(), message.getBody());
 				
 				// Create msg content
-				String chatRoomURL = "http://talkabouthealth.com/talk12";
 				Message replyMessage = new Message();
 				replyMessage.setImService(message.getImService());
-				replyMessage
-						.setBody("Thank you for starting a conversation. Click on this link to start the conversation: "
-								+ chatRoomURL);
+				replyMessage.setBody(
+						"Thank you for starting a conversation. Click on this link to join the conversation: "
+						+ CHAT_URL + topicId);
 				replyMessage.setFrom(message.getTo());
 				replyMessage.setTo(message.getFrom());
 				
@@ -102,7 +89,7 @@ public class IMNotifier {
 								onlineUserInfo.addOnlineUser(userInfo.getUid(), userInfo);
 								System.out.println(userInfo + " is added in to online user list");
 							} else {
-								System.out.println(userInfo + " does not exist.");
+								System.out.println(userInfo + " isn't in TAH database!");
 							}
 						} catch (Exception e1) {
 							e1.printStackTrace();
@@ -149,25 +136,16 @@ public class IMNotifier {
 			return null;
 		}
 		
-		//'YahooIM', 'WindowLive', 'GoogleTalk'
 		String imService = null;
 		String imUsername = null;
 		if (user.contains("@gmail")) {
 			//Google service
 			imService = "GoogleTalk";
-			imUsername = user;
-			int end = user.indexOf("@");
-			if (end != -1) {
-				imUsername.substring(0, end);
-			}
+			imUsername = removeService(user);
 		}
 		else if (user.contains("@live") || user.contains("@hotmail")) {
 			imService = "WindowLive";
-			imUsername = user;
-			int end = user.indexOf("@");
-			if (end != -1) {
-				imUsername.substring(0, end);
-			}
+			imUsername = removeService(user);
 		}
 		else {
 			//for now default - Yahoo
@@ -175,72 +153,96 @@ public class IMNotifier {
 			imUsername = user;
 		}
 		
+		//TODO: user can enter full id?
 		UserInfo userInfo = DBUtil.getUserByIm(imService, imUsername);
 		return userInfo;
 	}
 	
-	public void addContact(String imService, String imUsername) throws Exception {
-		//TODO finish it?
-//		session.addContact(MainAccount, imUsername);
+	private String removeService(String imUsername) {
+		int end = imUsername.indexOf("@");
+		if (end != -1) {
+			imUsername = imUsername.substring(0, end);
+		}
+		return imUsername;
+	}
+
+	//TODO move it to enum?
+	public IMService getIMServiceByName(String imService) {
+		//'YahooIM', 'WindowLive', 'GoogleTalk'
+		if ("GoogleTalk".equals(imService)) {
+			return IMService.GOOGLE;
+		}
+		else if ("WindowLive".equals(imService)) {
+			return IMService.MSN;
+		}
+		else if ("YahooIM".equals(imService)) {
+			return IMService.YAHOO;
+		}
+		else {
+			throw new IllegalArgumentException("Bad IM Service name");
+		}
 	}
 	
-	public boolean Broadcast(final String[] mail_list, String[] UID, String _tid) throws Exception {
+	public void addContact(String imServiceName, String imUsername) throws Exception {
+		IMService imService = getIMServiceByName(imServiceName);
+		imUsername = prepareUsername(imUsername, imService);
 		
-		int count =0; //counts of successful sending
+		session.addContact(loginInfoMap.get(imService).getUser(), imUsername);
+	}
+	
+	private String prepareUsername(String imUsername, IMService imService) {
+		if (imUsername.contains("@")) {
+			//Yahoo doesn't need "@yahoo.com"
+			if (imService == IMService.YAHOO) {
+				imUsername = removeService(imUsername);
+			}
+		}
+		else {
+			if (imService == IMService.GOOGLE) {
+				imUsername += "@gmail.com";
+			}
+			if (imService == IMService.MSN) {
+				//TODO: hotmail or live?
+				imUsername += "@hotmail.com";
+			}
+		}
 		
-		String url = "http://talkabouthealth.com/chat?uid=";
-		String des = "Please join the disscusion of the topic. Use the link: ";
-		
+		return imUsername;
+	}
+
+	public IMSession getSession() {
+		return session;
+	}
+
+	public void broadcast(String[] uidArray, String topicId, String topicName) throws Exception {
 		System.out.println("Broadcast...\n");
 		
-		//setting Broadcast Message
-		Message bMessage = new Message();
-		bMessage.setImService(IMService.GOOGLE);
-		bMessage.setBody("No link. Try it later.");  //default message
+		Message notificationMessage = new Message();
+		notificationMessage.setImService(IMService.GOOGLE);
 		
-		//TODO: finish this!
-		bMessage.setFrom(null);
+		String url = CHAT_URL+topicId;
+		String text = "Please join the disscusion of the topic '"+topicName+"'. Use the link: "+url;
+		notificationMessage.setBody(text);
 		
-		try { 
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		//sending message
+		for(int i = 0; i < uidArray.length; i++) {
+			try {
+				UserInfo userInfo = DBUtil.getUserById(uidArray[i]);
+				
+				//from - get account according to user's IM Service
+				IMService imService = getIMServiceByName(userInfo.getImService());
+				notificationMessage.setFrom(loginInfoMap.get(imService).getUser());
+				
+				//to - fix IM Username
+				String imUsername = prepareUsername(userInfo.getImUsername(), imService);
+				notificationMessage.setTo(imUsername);
+				
+				session.sendMessage(notificationMessage);
+				
+				DBUtil.saveNotification(uidArray[i], topicId);
+			} catch (IMException e) {
+				e.printStackTrace();
+			}
 		}
-		
-		//Sending Message
-		try {
-				for(int i = 0; i < mail_list.length; i++){
-					//TODO: finish this!
-					if(session.isOnline("Main Account", mail_list[i])){
-						System.out.println(mail_list[i] + " is online. Send messages to it");
-						bMessage.setTo(mail_list[i]);
-						bMessage.setBody(des + url + UID[i]);
-						session.sendMessage(bMessage);
-						
-						count++;
-						//record in DB
-						try {
-							DBUtil.saveNotification(UID[i], _tid, 1);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					else {
-						try {
-							DBUtil.saveNotification(UID[i], _tid, 0);
-						} catch (Exception e){
-							e.printStackTrace();
-						}
-					}
-				}
-								
-		} catch (IMException e) {
-			e.printStackTrace();
-		}
-		
-		if(count < mail_list.length) return false;
-		else return true;				
-			
-	}//end of Broadcast
-	
+	}
 }

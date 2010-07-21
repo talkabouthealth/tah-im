@@ -1,18 +1,18 @@
 package improject.services;
 
+import improject.IMException;
+import improject.IMSession.IMService;
+import improject.LoginInfo;
+import improject.Message;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import improject.IMException;
-import improject.LoginInfo;
-import improject.Message;
-import improject.IMSession.IMService;
 import net.sf.jml.Email;
 import net.sf.jml.MsnConnection;
 import net.sf.jml.MsnContact;
 import net.sf.jml.MsnContactList;
 import net.sf.jml.MsnMessenger;
-import net.sf.jml.MsnProtocol;
 import net.sf.jml.MsnSwitchboard;
 import net.sf.jml.MsnUserStatus;
 import net.sf.jml.event.MsnAdapter;
