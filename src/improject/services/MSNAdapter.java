@@ -115,7 +115,6 @@ public class MSNAdapter extends AbstractServiceAdapter {
 
 	@Override
 	public void addContact(String contact) throws IMException {
-		//TODO -- may need work on getting messages 
 		messenger.removeFriend(Email.parseStr(contact),false);
 		messenger.addFriend(Email.parseStr(contact),null);
 	}

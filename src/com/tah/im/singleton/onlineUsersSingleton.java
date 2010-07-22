@@ -6,6 +6,7 @@ import java.util.Map;
 import com.tah.im.UserInfo;
 
 public class OnlineUsersSingleton {
+	
 	private static OnlineUsersSingleton _onlineUsersSingleton = new OnlineUsersSingleton();
 	private Map<String, UserInfo> onlineUsersMap = new HashMap<String, UserInfo>();
 
@@ -15,20 +16,20 @@ public class OnlineUsersSingleton {
 		return _onlineUsersSingleton;
 	}
 
-	public void removeOnlineUser(String email) {
-		onlineUsersMap.remove(email);
+	public void removeOnlineUser(String uid) {
+		onlineUsersMap.remove(uid);
 	}
 
-	public void addOnlineUser(String email, UserInfo userInfo) {
-		onlineUsersMap.put(email, userInfo);
+	public void addOnlineUser(String uid, UserInfo userInfo) {
+		onlineUsersMap.put(uid, userInfo);
 	}
 
-	public UserInfo getOnlineUser(String email) {
-		return onlineUsersMap.get(email);
+	public UserInfo getOnlineUser(String uid) {
+		return onlineUsersMap.get(uid);
 	}
 	
-	public boolean isUserOnline(String email) {
-		return onlineUsersMap.get(email) != null;
+	public boolean isUserOnline(String uid) {
+		return onlineUsersMap.get(uid) != null;
 	}
 
 	public Map<String, UserInfo> getOnlineUserMap() {
@@ -37,8 +38,8 @@ public class OnlineUsersSingleton {
 
 	public void printAll() {
 		System.out.println("--------- Online Users -------------");
-		for (String user : onlineUsersMap.keySet()) {
-			System.out.println(user + " : "+onlineUsersMap.get(user));
+		for (String userId : onlineUsersMap.keySet()) {
+			System.out.println(userId + " : "+onlineUsersMap.get(userId));
 		}
 	}
 }

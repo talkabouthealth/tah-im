@@ -22,7 +22,6 @@ public class testIM {
 //		try {
 //			imSession.sendMessage(replyMessage);
 //		} catch (IMException e) {
-//			//TODO: handle errors correctly?
 //			e.printStackTrace();
 //		}
 //		

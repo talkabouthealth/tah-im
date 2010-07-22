@@ -16,16 +16,22 @@ import com.tah.im.singleton.OnlineUsersSingleton;
 //TODO: make good logging?
 public class IMNotifier {
 	
-	public static final String CHAT_URL = "http://talkabouthealth.com:9000/chat/";
+	public static final String TALK_URL = "http://talkabouthealth.com:9000/talk/";
 	private static IMNotifier instance;
 
 	private Map<IMService, LoginInfo> loginInfoMap;
 	private IMSession session;
 	private OnlineUsersSingleton onlineUserInfo = OnlineUsersSingleton.getInstance();
 	
-	public static IMNotifier getInstance(LoginInfo[] loginInfoArray) {
+	public static void init(LoginInfo[] loginInfoArray) {
 		if (instance == null) {
 			instance = new IMNotifier(loginInfoArray);
+		}
+	}
+	
+	public static IMNotifier getInstance() {
+		if (instance == null) {
+			throw new AssertionError("IMNotifier isn't initialized");
 		}
 		return instance;
 	}
@@ -56,7 +62,7 @@ public class IMNotifier {
 				replyMessage.setImService(message.getImService());
 				replyMessage.setBody(
 						"Thank you for starting a conversation. Click on this link to join the conversation: "
-						+ CHAT_URL + topicId);
+						+ TALK_URL + topicId);
 				replyMessage.setFrom(message.getTo());
 				replyMessage.setTo(message.getFrom());
 				
@@ -153,7 +159,7 @@ public class IMNotifier {
 			imUsername = user;
 		}
 		
-		//TODO: user can enter full id?
+		//TODO: user can enter full id and we won't find it in db?
 		UserInfo userInfo = DBUtil.getUserByIm(imService, imUsername);
 		return userInfo;
 	}
@@ -220,7 +226,7 @@ public class IMNotifier {
 		Message notificationMessage = new Message();
 		notificationMessage.setImService(IMService.GOOGLE);
 		
-		String url = CHAT_URL+topicId;
+		String url = TALK_URL+topicId;
 		String text = "Please join the disscusion of the topic '"+topicName+"'. Use the link: "+url;
 		notificationMessage.setBody(text);
 		
