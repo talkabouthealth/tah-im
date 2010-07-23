@@ -11,6 +11,7 @@ import improject.UserListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mongodb.DBObject;
 import com.tah.im.singleton.OnlineUsersSingleton;
 
 //TODO: make good logging?
@@ -220,14 +221,18 @@ public class IMNotifier {
 		return session;
 	}
 
-	public void broadcast(String[] uidArray, String topicId, String topicName) throws Exception {
+	public void broadcast(String[] uidArray, String topicId) throws Exception {
 		System.out.println("Broadcast...\n");
 		
-		Message notificationMessage = new Message();
-		notificationMessage.setImService(IMService.GOOGLE);
+		DBObject topicDBObject = DBUtil.getTopicById(topicId);
+		if (topicDBObject == null) {
+			System.err.println("Bad topicId for broadcasting: "+topicId);
+			return;
+		}
 		
-		String url = TALK_URL+topicId;
-		String text = "Please join the disscusion of the topic '"+topicName+"'. Use the link: "+url;
+		Message notificationMessage = new Message();
+		String url = TALK_URL+topicDBObject.get("tid");
+		String text = "Please join the disscusion of the topic '"+topicDBObject.get("topic")+"'. Use the link: "+url;
 		notificationMessage.setBody(text);
 		
 		//sending message
@@ -237,6 +242,7 @@ public class IMNotifier {
 				
 				//from - get account according to user's IM Service
 				IMService imService = getIMServiceByName(userInfo.getImService());
+				notificationMessage.setImService(imService);
 				notificationMessage.setFrom(loginInfoMap.get(imService).getUser());
 				
 				//to - fix IM Username

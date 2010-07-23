@@ -116,6 +116,22 @@ private static Mongo mongo;
 		return (Integer)topicObject.get("tid");
 	}
 	
+	public static DBObject getTopicById(String topicId) {
+		DBCollection topicsColl = DBUtil.getDB().getCollection("topics");
+		
+		DBObject query = null;
+		try {
+			query = new BasicDBObject("_id", new ObjectId(topicId));
+		}
+		catch(IllegalArgumentException iae) {
+			//bad topicId - return no topic 
+			return null;
+		}
+		DBObject topicDBObject = topicsColl.findOne(query);
+		
+		return topicDBObject;
+	}
+	
 	/* ---- Notifications ----- */
 	public static void saveNotification(String uid, String topicId) {
 		DBCollection notificationsColl = getDB().getCollection("notifications");
