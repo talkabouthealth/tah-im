@@ -55,14 +55,14 @@ public class IMNotifier {
 				// Create topic with given topic name
 				UserInfo userInfo = getUserInfo(message.getFrom());
 				System.out.println("User: "+userInfo);
-				String topicId = DBUtil.createTopic(userInfo.getUid(), message.getBody());
+				int tid = DBUtil.createTopic(userInfo.getUid(), message.getBody());
 				
 				// Create msg content
 				Message replyMessage = new Message();
 				replyMessage.setImService(message.getImService());
 				replyMessage.setBody(
 						"Thank you for starting a conversation. Click on this link to join the conversation: "
-						+ TALK_URL + topicId);
+						+ TALK_URL + tid);
 				replyMessage.setFrom(message.getTo());
 				replyMessage.setTo(message.getFrom());
 				

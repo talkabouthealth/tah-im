@@ -8,7 +8,9 @@ import org.bson.types.ObjectId;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
+import com.mongodb.DB.WriteConcern;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.DBRef;
 import com.mongodb.Mongo;
@@ -66,23 +68,53 @@ private static Mongo mongo;
 	}
 	
 	/* ------ Topics ------ */
-	public static String createTopic(String talkerId, String topicName) {
+	public static int createTopic(String talkerId, String topicName) {
+		//we try to insert topic 5 times
+		return createTopic(talkerId, topicName, 5);
+	}
+	
+	/**
+	 * Tries to insert topic 'count' times (in case of duplicate key error on 'tid' field)
+	 * Returns -1 in case of failure
+	 */
+	//TODO: move similar code in one jar ?
+	private static int createTopic(String talkerId, String topicName, int count) {
+		if (count == 0) {
+			return -1;
+		}
+		
 		DBCollection topicsColl = getDB().getCollection("topics");
 		
-		Date now = new Date();
+		//get last tid
+		DBCursor topicsCursor = 
+			topicsColl.find(null, new BasicDBObject("tid", "")).sort(new BasicDBObject("tid", -1)).limit(1);
+		int tid = topicsCursor.hasNext() ? ((Integer)topicsCursor.next().get("tid")) + 1 : 1;
 		
+		Date now = new Date();
 		DBRef talkerRef = new DBRef(DBUtil.getDB(), "talkers", new ObjectId(talkerId));
 		DBObject topicObject = BasicDBObjectBuilder.start()
 			.add("uid", talkerRef)
+			.add("tid", tid)
 			.add("topic", topicName)
 			.add("cr_date", now)
 			.add("disp_date", now)
 			.get();
 
-		topicsColl.save(topicObject);
-		return topicObject.get("_id").toString();
+		//Only with STRICT WriteConcern we receive exception on duplicate key
+		topicsColl.setWriteConcern(WriteConcern.STRICT);
+		try {
+			topicsColl.save(topicObject);
+		}
+		catch (MongoException me) {
+			//E11000 duplicate key error index
+			if (me.getCode() == 11000) {
+				System.err.println("Duplicate key error while saving topic");
+				return createTopic(talkerId, topicName, --count);
+			}
+			me.printStackTrace();
+		}
+		return (Integer)topicObject.get("tid");
 	}
-	
 	
 	/* ---- Notifications ----- */
 	public static void saveNotification(String uid, String topicId) {
@@ -97,5 +129,10 @@ private static Mongo mongo;
 			.get();
 		
 		notificationsColl.save(notificationDBObject);
+	}
+	
+	public static void main(String[] args) {
+		long tid = DBUtil.createTopic("4c2cb43160adf3055c97d061", "Hello World Topic!!!!");
+		System.out.println(tid);
 	}
 }
