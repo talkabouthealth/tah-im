@@ -12,17 +12,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.mongodb.DBObject;
+import com.mongodb.DBRef;
 import com.tah.im.singleton.OnlineUsersSingleton;
 
 //TODO: make good logging?
 public class IMNotifier {
 	
 	public static final String TALK_URL = "http://talkabouthealth.com:9000/talk/";
+	public static final String SIGNUP_URL = "http://www.talkabouthealth.com:9000/signup";
+	
 	private static IMNotifier instance;
 
 	private Map<IMService, LoginInfo> loginInfoMap;
 	private IMSession session;
 	private OnlineUsersSingleton onlineUserInfo = OnlineUsersSingleton.getInstance();
+	
+	/**
+	 * We use it for 2 step process of starting topic via IM.
+	 * Stores first received message - topic (map value) from particular user (map key)
+	 * TODO: maybe user timeout map? We don't need very old messages.
+	 */
+	private Map<String, String> receivedMessages = new HashMap<String, String>();
 	
 	public static void init(LoginInfo[] loginInfoArray) {
 		if (instance == null) {
@@ -55,15 +65,41 @@ public class IMNotifier {
 
 				// Create topic with given topic name
 				UserInfo userInfo = getUserInfo(message.getFrom());
-				System.out.println("User: "+userInfo);
-				int tid = DBUtil.createTopic(userInfo.getUid(), message.getBody());
+				
+				String reply = null;
+				if (!userInfo.isExist()) {
+					//if no such user - reply with registration message
+					//TODO: url to Notifications/Accounts page?
+					reply = "Hi, thank you for the message. Please register here: "+SIGNUP_URL;
+				}
+				else {
+					String previousMessage = receivedMessages.get(message.getFrom());
+					if (previousMessage == null) {
+						reply = "Hi, thank you for the message. "+
+						 	"Would you like to start the new conversation: \""+message.getBody()+"\"? "+
+						 	"Reply 'yes' to start the new conversation. " +
+						 	"To contact us, please send an email to support@talkabouthealth.com.";
+						
+						receivedMessages.put(message.getFrom(), message.getBody());
+					}
+					else {
+						//second step - create topic if 'yes'
+						if (message.getBody().equals("yes")) {
+							int tid = DBUtil.createTopic(userInfo.getUid(), previousMessage);
+							reply = "Thank you. Click on this link to join the conversation: " + TALK_URL + tid;
+						}
+						else {
+							reply = "Conversation isn't created. Please write again to create a new one.";
+						}
+						
+						receivedMessages.remove(message.getFrom());
+					}
+				}
 				
 				// Create msg content
 				Message replyMessage = new Message();
 				replyMessage.setImService(message.getImService());
-				replyMessage.setBody(
-						"Thank you for starting a conversation. Click on this link to join the conversation: "
-						+ TALK_URL + tid);
+				replyMessage.setBody(reply);
 				replyMessage.setFrom(message.getTo());
 				replyMessage.setTo(message.getFrom());
 				
@@ -232,7 +268,10 @@ public class IMNotifier {
 		
 		Message notificationMessage = new Message();
 		String url = TALK_URL+topicDBObject.get("tid");
-		String text = "Please join the disscusion of the topic '"+topicDBObject.get("topic")+"'. Use the link: "+url;
+		
+		String authorUserName = (String)((DBRef)topicDBObject.get("uid")).fetch().get("uname");
+		String text = "talkabouthealth.com: "+authorUserName+" is requesting support for: " +
+				"\""+topicDBObject.get("topic")+"\". Click here to help: "+url;
 		notificationMessage.setBody(text);
 		
 		//sending message
