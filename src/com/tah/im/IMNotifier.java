@@ -270,7 +270,7 @@ public class IMNotifier {
 		String url = TALK_URL+topicDBObject.get("tid");
 		
 		String authorUserName = (String)((DBRef)topicDBObject.get("uid")).fetch().get("uname");
-		String text = "talkabouthealth.com: "+authorUserName+" is requesting support for: " +
+		String text = authorUserName+" is requesting support for: " +
 				"\""+topicDBObject.get("topic")+"\". Click here to help: "+url;
 		notificationMessage.setBody(text);
 		
