@@ -44,11 +44,21 @@ private static Mongo mongo;
 		query.put("im_uname", imUsername);
 		DBObject talkerDBObject = talkersColl.findOne(query);
 		
+		if (talkerDBObject == null) {
+			//check new IM Accounts storage - array "im_accounts"
+			DBObject imAccountDBObject = BasicDBObjectBuilder.start()
+				.add("uname", imUsername)
+				.add("service", imService)
+				.get();
+			query = new BasicDBObject("im_accounts", imAccountDBObject);
+			talkerDBObject = talkersColl.findOne(query);
+		}
+		
 		UserInfo userInfo = new UserInfo();
 		userInfo.parseDBInfo(talkerDBObject);
 		
 		//it's possible that we don't have such IM username in db,
-		//so we return UserInfo only with IM data
+		//so we return UserInfo only with IM data - to display in ONLINE lists
 		userInfo.setImService(imService);
 		userInfo.setImUsername(imUsername);
 		
@@ -148,7 +158,9 @@ private static Mongo mongo;
 	}
 	
 	public static void main(String[] args) {
-		long tid = DBUtil.createTopic("4c2cb43160adf3055c97d061", "Hello World Topic!!!!");
-		System.out.println(tid);
+//		long tid = DBUtil.createTopic("4c2cb43160adf3055c97d061", "Hello World Topic!!!!");
+//		System.out.println(tid);
+		
+		System.out.println(getUserByIm("YahooIM", "kan_kangaroo14"));
 	}
 }

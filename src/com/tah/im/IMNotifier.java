@@ -279,16 +279,18 @@ public class IMNotifier {
 			try {
 				UserInfo userInfo = DBUtil.getUserById(uidArray[i]);
 				
-				//from - get account according to user's IM Service
-				IMService imService = getIMServiceByName(userInfo.getImService());
-				notificationMessage.setImService(imService);
-				notificationMessage.setFrom(loginInfoMap.get(imService).getUser());
-				
-				//to - fix IM Username
-				String imUsername = prepareUsername(userInfo.getImUsername(), imService);
-				notificationMessage.setTo(imUsername);
-				
-				session.sendMessage(notificationMessage);
+				for (IMAccountBean imAccount : userInfo.getImAccounts()) {
+					//from - get account according to user's IM Service
+					IMService imService = getIMServiceByName(imAccount.getService());
+					notificationMessage.setImService(imService);
+					notificationMessage.setFrom(loginInfoMap.get(imService).getUser());
+					
+					//to - fix IM Username
+					String imUsername = prepareUsername(imAccount.getUserName(), imService);
+					notificationMessage.setTo(imUsername);
+					
+					session.sendMessage(notificationMessage);
+				}
 				
 				DBUtil.saveNotification(uidArray[i], topicId);
 			} catch (IMException e) {

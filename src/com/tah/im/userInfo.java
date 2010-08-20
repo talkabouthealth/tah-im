@@ -1,5 +1,9 @@
 package com.tah.im;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.mongodb.DBObject;
 
 
@@ -12,6 +16,8 @@ public class UserInfo {
 	
 	private String imService;
 	private String imUsername;
+	
+	private Set<IMAccountBean> imAccounts;
 	
 	public UserInfo() {
 	}
@@ -31,7 +37,32 @@ public class UserInfo {
 			
 			setImService((String)talkerDBObject.get("im"));
 			setImUsername((String)talkerDBObject.get("im_uname"));
+			
+			@SuppressWarnings("unchecked")
+			Collection<DBObject> imAccountsDBList = (Collection<DBObject>)talkerDBObject.get("im_accounts");
+			parseIMAccounts(imAccountsDBList);
 		}
+	}
+	
+	private void parseIMAccounts(Collection<DBObject> imAccountsDBList) {
+		Set<IMAccountBean> imAccountsSet = new LinkedHashSet<IMAccountBean>();
+		if (imAccountsDBList != null) {
+			for (DBObject emailDBObject : imAccountsDBList) {
+				String userName = (String)emailDBObject.get("uname");
+				String service = (String)emailDBObject.get("service");
+				IMAccountBean imAccount = new IMAccountBean(userName, service);
+				
+				imAccountsSet.add(imAccount);
+			}
+		}
+		
+		//FIXME: to convert old IMs to new IM format
+		if (getImUsername() != null) {
+			IMAccountBean imAccount = new IMAccountBean(getImUsername(), getImService());
+			imAccountsSet.add(imAccount);
+		}
+		
+		imAccounts = imAccountsSet;
 	}
 	
 	public boolean isExist() {
@@ -75,6 +106,14 @@ public class UserInfo {
 		this.gender = gender;
 	}
 
+	public Set<IMAccountBean> getImAccounts() {
+		return imAccounts;
+	}
+
+	public void setImAccounts(Set<IMAccountBean> imAccounts) {
+		this.imAccounts = imAccounts;
+	}
+
 	public String getImService() {
 		return imService;
 	}
@@ -90,5 +129,5 @@ public class UserInfo {
 	public void setImUsername(String imUsername) {
 		this.imUsername = imUsername;
 	}
-
+	
 }
