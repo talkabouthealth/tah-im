@@ -35,9 +35,6 @@ public class UserInfo {
 			setEmail((String)talkerDBObject.get("email"));
 			setGender((String)talkerDBObject.get("gender"));
 			
-			setImService((String)talkerDBObject.get("im"));
-			setImUsername((String)talkerDBObject.get("im_uname"));
-			
 			@SuppressWarnings("unchecked")
 			Collection<DBObject> imAccountsDBList = (Collection<DBObject>)talkerDBObject.get("im_accounts");
 			parseIMAccounts(imAccountsDBList);
@@ -54,12 +51,6 @@ public class UserInfo {
 				
 				imAccountsSet.add(imAccount);
 			}
-		}
-		
-		//FIXME: to convert old IMs to new IM format
-		if (getImUsername() != null) {
-			IMAccountBean imAccount = new IMAccountBean(getImUsername(), getImService());
-			imAccountsSet.add(imAccount);
 		}
 		
 		imAccounts = imAccountsSet;

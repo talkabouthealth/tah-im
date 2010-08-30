@@ -39,20 +39,12 @@ private static Mongo mongo;
 	public static UserInfo getUserByIm(String imService, String imUsername) {
 		DBCollection talkersColl = getDB().getCollection("talkers");
 		
-		DBObject query = new BasicDBObject();
-		query.put("im", imService);
-		query.put("im_uname", imUsername);
+		DBObject imAccountDBObject = BasicDBObjectBuilder.start()
+			.add("uname", imUsername)
+			.add("service", imService)
+			.get();
+		DBObject query = new BasicDBObject("im_accounts", imAccountDBObject);
 		DBObject talkerDBObject = talkersColl.findOne(query);
-		
-		if (talkerDBObject == null) {
-			//check new IM Accounts storage - array "im_accounts"
-			DBObject imAccountDBObject = BasicDBObjectBuilder.start()
-				.add("uname", imUsername)
-				.add("service", imService)
-				.get();
-			query = new BasicDBObject("im_accounts", imAccountDBObject);
-			talkerDBObject = talkersColl.findOne(query);
-		}
 		
 		UserInfo userInfo = new UserInfo();
 		userInfo.parseDBInfo(talkerDBObject);
