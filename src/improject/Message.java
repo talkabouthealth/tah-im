@@ -1,5 +1,7 @@
 package improject;
 
+import java.util.Date;
+
 import improject.IMSession.IMService;
 
 /**
@@ -12,6 +14,7 @@ public class Message {
 	private String from;
 	private String to;
 	private IMService imService;
+	private Date time;
 	
 	@Override
 	public String toString() {
@@ -44,5 +47,10 @@ public class Message {
 	public void setTo(String to) {
 		this.to = to;
 	}
-
+	public Date getTime() {
+		return time;
+	}
+	public void setTime(Date time) {
+		this.time = time;
+	}
 }

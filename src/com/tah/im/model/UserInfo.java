@@ -5,7 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.mongodb.DBObject;
-import com.tah.im.IMAccountBean;
 
 
 public class UserInfo {
@@ -15,18 +14,16 @@ public class UserInfo {
 	private String email;
 	private String gender;
 	
-	private String imService;
-	private String imUsername;
-	
-	private Set<IMAccountBean> imAccounts;
+	//IM account in the current context (e.g. message received from this account)
+	private IMAccount currentIMAccount;
+	private Set<IMAccount> imAccounts;
 	
 	public UserInfo() {
 	}
 
 	public UserInfo(String imService, String imUsername) {
 		super();
-		this.imService = imService;
-		this.imUsername = imUsername;
+		currentIMAccount = new IMAccount(imUsername, imService);
 	}
 	
 	public void parseDBInfo(DBObject talkerDBObject) {
@@ -43,12 +40,12 @@ public class UserInfo {
 	}
 	
 	private void parseIMAccounts(Collection<DBObject> imAccountsDBList) {
-		Set<IMAccountBean> imAccountsSet = new LinkedHashSet<IMAccountBean>();
+		Set<IMAccount> imAccountsSet = new LinkedHashSet<IMAccount>();
 		if (imAccountsDBList != null) {
 			for (DBObject emailDBObject : imAccountsDBList) {
 				String userName = (String)emailDBObject.get("uname");
 				String service = (String)emailDBObject.get("service");
-				IMAccountBean imAccount = new IMAccountBean(userName, service);
+				IMAccount imAccount = new IMAccount(userName, service);
 				
 				imAccountsSet.add(imAccount);
 			}
@@ -63,7 +60,7 @@ public class UserInfo {
 
 	@Override
 	public String toString() {
-		return imUsername+" ("+imService+")";
+		return currentIMAccount.toString();
 	}
 
 	public String getUid() {
@@ -98,28 +95,19 @@ public class UserInfo {
 		this.gender = gender;
 	}
 
-	public Set<IMAccountBean> getImAccounts() {
+	public Set<IMAccount> getImAccounts() {
 		return imAccounts;
 	}
 
-	public void setImAccounts(Set<IMAccountBean> imAccounts) {
+	public void setImAccounts(Set<IMAccount> imAccounts) {
 		this.imAccounts = imAccounts;
 	}
 
-	public String getImService() {
-		return imService;
+	public IMAccount getCurrentIMAccount() {
+		return currentIMAccount;
 	}
 
-	public void setImService(String imService) {
-		this.imService = imService;
+	public void setCurrentIMAccount(IMAccount currentIMAccount) {
+		this.currentIMAccount = currentIMAccount;
 	}
-
-	public String getImUsername() {
-		return imUsername;
-	}
-
-	public void setImUsername(String imUsername) {
-		this.imUsername = imUsername;
-	}
-	
 }

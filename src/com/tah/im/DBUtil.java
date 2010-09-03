@@ -8,13 +8,14 @@ import org.bson.types.ObjectId;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
-import com.mongodb.DB.WriteConcern;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.DBRef;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
+import com.tah.im.model.IMAccount;
 import com.tah.im.model.UserInfo;
 
 public class DBUtil {
@@ -52,8 +53,7 @@ private static Mongo mongo;
 		
 		//it's possible that we don't have such IM username in db,
 		//so we return UserInfo only with IM data - to display in ONLINE lists
-		userInfo.setImService(imService);
-		userInfo.setImUsername(imUsername);
+		userInfo.setCurrentIMAccount(new IMAccount(imUsername, imService));
 		
 		return userInfo;
 	}
@@ -104,9 +104,8 @@ private static Mongo mongo;
 			.get();
 
 		//Only with STRICT WriteConcern we receive exception on duplicate key
-		topicsColl.setWriteConcern(WriteConcern.STRICT);
 		try {
-			topicsColl.save(topicObject);
+			topicsColl.save(topicObject, WriteConcern.SAFE);
 		}
 		catch (MongoException me) {
 			//E11000 duplicate key error index
@@ -119,7 +118,7 @@ private static Mongo mongo;
 		return (Integer)topicObject.get("tid");
 	}
 	
-	public static DBObject getTopicById(String topicId) {
+	public static DBObject getConvoById(String topicId) {
 		DBCollection topicsColl = DBUtil.getDB().getCollection("topics");
 		
 		DBObject query = null;

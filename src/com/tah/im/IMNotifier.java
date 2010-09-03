@@ -8,11 +8,15 @@ import improject.Message;
 import improject.MessageListener;
 import improject.UserListener;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.mongodb.DBObject;
 import com.mongodb.DBRef;
+import com.tah.im.model.IMAccount;
+import com.tah.im.model.Notification;
+import com.tah.im.model.Notification.NotificationType;
 import com.tah.im.model.UserInfo;
 import com.tah.im.singleton.OnlineUsersSingleton;
 
@@ -134,21 +138,24 @@ public class IMNotifier {
 		return session;
 	}
 
-	public void broadcast(String[] uidArray, String topicId) throws Exception {
+	public void broadcast(String[] uidArray, String convoId) throws Exception {
 		System.out.println("Broadcast...\n");
 		
-		DBObject topicDBObject = DBUtil.getTopicById(topicId);
-		if (topicDBObject == null) {
-			System.err.println("Bad topicId for broadcasting: "+topicId);
+		//TODO: update for convos/questions
+		
+		DBObject convoDBObject = DBUtil.getConvoById(convoId);
+		if (convoDBObject == null) {
+			System.err.println("Bad topicId for broadcasting: "+convoId);
 			return;
 		}
 		
 		Message notificationMessage = new Message();
-		String url = TALK_URL+topicDBObject.get("tid");
+		String url = TALK_URL+convoDBObject.get("tid");
 		
-		String authorUserName = (String)((DBRef)topicDBObject.get("uid")).fetch().get("uname");
+		String authorUserName = (String)((DBRef)convoDBObject.get("uid")).fetch().get("uname");
+		String convoTitle = (String)convoDBObject.get("topic");
 		String text = authorUserName+" is requesting support for: " +
-				"\""+topicDBObject.get("topic")+"\". Click here to help: "+url;
+				"\""+convoTitle+"\". Click here to help: "+url;
 		notificationMessage.setBody(text);
 		
 		//sending message
@@ -156,7 +163,7 @@ public class IMNotifier {
 			try {
 				UserInfo userInfo = DBUtil.getUserById(uidArray[i]);
 				
-				for (IMAccountBean imAccount : userInfo.getImAccounts()) {
+				for (IMAccount imAccount : userInfo.getImAccounts()) {
 					//from - get account according to user's IM Service
 					IMService imService = IMUtil.getIMServiceByName(imAccount.getService());
 					notificationMessage.setImService(imService);
@@ -166,10 +173,16 @@ public class IMNotifier {
 					String imUsername = IMUtil.prepareUsername(imAccount.getUserName(), imService);
 					notificationMessage.setTo(imUsername);
 					
+					Notification notification = new Notification(NotificationType.CONVO);
+					notification.setRelatedId(convoId);
+					notification.setUserName(authorUserName);
+					notification.setText(text);
+					messageHandler.saveNotification(imAccount, notification);
+					
 					session.sendMessage(notificationMessage);
 				}
 				
-				DBUtil.saveNotification(uidArray[i], topicId);
+				DBUtil.saveNotification(uidArray[i], convoId);
 			} catch (IMException e) {
 				e.printStackTrace();
 			}

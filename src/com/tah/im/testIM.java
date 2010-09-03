@@ -1,9 +1,23 @@
 package com.tah.im;
 
+import improject.LoginInfo;
+import improject.IMSession.IMService;
+
 
 public class testIM {
+	
+	private static final LoginInfo[] DEV_LOGIN_ARRAY = new LoginInfo[] {
+		new LoginInfo(IMService.GOOGLE, "talkabouthealth.com.test@gmail.com", "CarrotCake917"),
+		new LoginInfo(IMService.MSN, "talkabouthealth.com.test@hotmail.com", "CarrotCake917"),
+		new LoginInfo(IMService.YAHOO, "talkabouthealthtest@ymail.com", "CarrotCake917"),
+	};
+ 
+ 
 	public static void main(String[] args) throws Exception {
-//		IMNotifier imNotifier = IMNotifier.getInstance();
+		IMNotifier.init(DEV_LOGIN_ARRAY);
+		IMNotifier imNotifier = IMNotifier.getInstance();
+		
+		imNotifier.broadcast(new String[]{"4c2cb43160adf3055c97d061"}, "4c5bce0aaeccbce58e8da64f");
 		
 //		Thread.sleep(10000);
 		

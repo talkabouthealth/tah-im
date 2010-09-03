@@ -1,9 +1,9 @@
-package com.tah.im;
+package com.tah.im.model;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class IMAccountBean {
+public class IMAccount {
 	
 	public static final Map<String, String> IM_SERVICES_MAP = new HashMap<String, String>();
 	static {
@@ -15,7 +15,7 @@ public class IMAccountBean {
 	private String userName;
 	private String service;
 	
-	public IMAccountBean(String userName, String service) {
+	public IMAccount(String userName, String service) {
 		this.userName = userName;
 		this.service = service;
 	}
@@ -27,11 +27,11 @@ public class IMAccountBean {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof IMAccountBean)) {
+		if (!(obj instanceof IMAccount)) {
 			return false;
 		}
 		
-		IMAccountBean other = (IMAccountBean)obj;
+		IMAccount other = (IMAccount)obj;
 		return userName.equals(other.userName) && service.equals(other.service);
 	}
 	

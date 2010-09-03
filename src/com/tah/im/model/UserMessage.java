@@ -1,6 +1,6 @@
 package com.tah.im.model;
 
-public class IMMessage {
+public class UserMessage {
 	
 	public enum MessageCommand {
 		START_CONVO("start"),
@@ -25,8 +25,17 @@ public class IMMessage {
 				return body;
 			}
 			//TODO: bad parsing
-			int startIndex = getCommandText().length();
-			return body.substring(startIndex);
+			int startIndex = getCommandText().length() + 1;
+			if (startIndex == body.length()) {
+				return null;
+			}
+			else {
+				String param = body.substring(startIndex);
+				if (param.trim().length() == 0) {
+					param = null;
+				}
+				return param;
+			}
 		}
 	}
 	

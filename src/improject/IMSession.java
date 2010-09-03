@@ -7,6 +7,7 @@ import improject.services.SkypeAdapter;
 import improject.services.YahooAdapter;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,6 +168,8 @@ public class IMSession implements MessageListener, UserListener {
 	 * @throws IMException
 	 */
 	public void sendMessage(Message message) throws IMException {
+		message.setTime(new Date());
+		
 		ServiceAdapter imService = serviceAdapters.get(message.getFrom());
 		imService.sendMessage(message);
 	}
