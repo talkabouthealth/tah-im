@@ -15,6 +15,7 @@ import com.mongodb.DBObject;
 import com.mongodb.DBRef;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.tah.im.model.UserInfo;
 
 public class DBUtil {
 	

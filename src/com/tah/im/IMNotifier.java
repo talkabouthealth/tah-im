@@ -13,6 +13,7 @@ import java.util.Map;
 
 import com.mongodb.DBObject;
 import com.mongodb.DBRef;
+import com.tah.im.model.UserInfo;
 import com.tah.im.singleton.OnlineUsersSingleton;
 
 //TODO: make good logging?
@@ -22,17 +23,12 @@ public class IMNotifier {
 	public static final String SIGNUP_URL = "http://www.talkabouthealth.com:9000/signup";
 	
 	private static IMNotifier instance;
-
+	
 	private Map<IMService, LoginInfo> loginInfoMap;
 	private IMSession session;
 	private OnlineUsersSingleton onlineUserInfo = OnlineUsersSingleton.getInstance();
 	
-	/**
-	 * We use it for 2 step process of starting topic via IM.
-	 * Stores first received message - topic (map value) from particular user (map key)
-	 * TODO: maybe user timeout map? We don't need very old messages.
-	 */
-	private Map<String, String> receivedMessages = new HashMap<String, String>();
+	private MessageHandler messageHandler;
 	
 	public static void init(LoginInfo[] loginInfoArray) {
 		if (instance == null) {
@@ -49,6 +45,7 @@ public class IMNotifier {
 
 	private IMNotifier(LoginInfo[] loginInfoArray) {
 		session = new IMSession();
+		messageHandler = new MessageHandler(this);
 		
 		loginInfoMap = new HashMap<IMSession.IMService, LoginInfo>();
 		for (LoginInfo loginInfo : loginInfoArray) {
@@ -61,54 +58,7 @@ public class IMNotifier {
 			@Override
 			// Automatically reply incoming message.
 			public void messageReceived(Message message) {
-				System.out.println("Message received:\n" + message);
-
-				// Create topic with given topic name
-				UserInfo userInfo = getUserInfo(message.getFrom());
-				
-				String reply = null;
-				if (!userInfo.isExist()) {
-					//if no such user - reply with registration message
-					//TODO: url to Notifications/Accounts page?
-					reply = "Hi, thank you for the message. Please register here: "+SIGNUP_URL;
-				}
-				else {
-					String previousMessage = receivedMessages.get(message.getFrom());
-					if (previousMessage == null) {
-						reply = "Hi, thank you for the message. "+
-						 	"Would you like to start the new conversation: \""+message.getBody()+"\"? "+
-						 	"Reply 'yes' to start the new conversation. " +
-						 	"To contact us, please send an email to support@talkabouthealth.com.";
-						
-						receivedMessages.put(message.getFrom(), message.getBody());
-					}
-					else {
-						//second step - create topic if 'yes'
-						if (message.getBody().equals("yes")) {
-							int tid = DBUtil.createTopic(userInfo.getUid(), previousMessage);
-							reply = "Thank you. Click on this link to join the conversation: " + TALK_URL + tid;
-						}
-						else {
-							reply = "Conversation isn't created. Please write again to create a new one.";
-						}
-						
-						receivedMessages.remove(message.getFrom());
-					}
-				}
-				
-				// Create msg content
-				Message replyMessage = new Message();
-				replyMessage.setImService(message.getImService());
-				replyMessage.setBody(reply);
-				replyMessage.setFrom(message.getTo());
-				replyMessage.setTo(message.getFrom());
-				
-				try {
-					session.sendMessage(replyMessage);
-				} catch (IMException e) {
-					//TODO: handle errors correctly?
-					e.printStackTrace();
-				}
+				messageHandler.handle(message);
 			}
 		});
 		
@@ -117,7 +67,7 @@ public class IMNotifier {
 
 			@Override
 			public void statusChanged(String user, String newStatus) {
-				UserInfo userInfo = getUserInfo(user);
+				UserInfo userInfo = IMUtil.getUserInfo(user);
 				
 				// If user changes status to ONLINE
 				if (newStatus.equalsIgnoreCase("available") || newStatus.equalsIgnoreCase("online")) {
@@ -173,86 +123,13 @@ public class IMNotifier {
 		thread.start();		
 	}
 	
-	//convert user (format of IMService) to UserInfo with data form TAH db
-	private UserInfo getUserInfo(String user) {
-		if (user == null) {
-			return null;
-		}
-		
-		String imService = null;
-		String imUsername = null;
-		if (user.contains("@gmail")) {
-			//Google service
-			imService = "GoogleTalk";
-			imUsername = removeService(user);
-		}
-		else if (user.contains("@live") || user.contains("@hotmail")) {
-			imService = "WindowLive";
-			imUsername = removeService(user);
-		}
-		else {
-			//for now default - Yahoo
-			imService = "YahooIM";
-			imUsername = user;
-		}
-		
-		//TODO: user can enter full id and we won't find it in db?
-		UserInfo userInfo = DBUtil.getUserByIm(imService, imUsername);
-		return userInfo;
-	}
-	
-	private String removeService(String imUsername) {
-		int end = imUsername.indexOf("@");
-		if (end != -1) {
-			imUsername = imUsername.substring(0, end);
-		}
-		return imUsername;
-	}
-
-	//TODO move it to enum?
-	public IMService getIMServiceByName(String imService) {
-		//'YahooIM', 'WindowLive', 'GoogleTalk'
-		if ("GoogleTalk".equals(imService)) {
-			return IMService.GOOGLE;
-		}
-		else if ("WindowLive".equals(imService)) {
-			return IMService.MSN;
-		}
-		else if ("YahooIM".equals(imService)) {
-			return IMService.YAHOO;
-		}
-		else {
-			throw new IllegalArgumentException("Bad IM Service name");
-		}
-	}
-	
 	public void addContact(String imServiceName, String imUsername) throws Exception {
-		IMService imService = getIMServiceByName(imServiceName);
-		imUsername = prepareUsername(imUsername, imService);
+		IMService imService = IMUtil.getIMServiceByName(imServiceName);
+		imUsername = IMUtil.prepareUsername(imUsername, imService);
 		
 		session.addContact(loginInfoMap.get(imService).getUser(), imUsername);
 	}
 	
-	private String prepareUsername(String imUsername, IMService imService) {
-		if (imUsername.contains("@")) {
-			//Yahoo doesn't need "@yahoo.com"
-			if (imService == IMService.YAHOO) {
-				imUsername = removeService(imUsername);
-			}
-		}
-		else {
-			if (imService == IMService.GOOGLE) {
-				imUsername += "@gmail.com";
-			}
-			if (imService == IMService.MSN) {
-				//TODO: hotmail or live?
-				imUsername += "@hotmail.com";
-			}
-		}
-		
-		return imUsername;
-	}
-
 	public IMSession getSession() {
 		return session;
 	}
@@ -281,12 +158,12 @@ public class IMNotifier {
 				
 				for (IMAccountBean imAccount : userInfo.getImAccounts()) {
 					//from - get account according to user's IM Service
-					IMService imService = getIMServiceByName(imAccount.getService());
+					IMService imService = IMUtil.getIMServiceByName(imAccount.getService());
 					notificationMessage.setImService(imService);
 					notificationMessage.setFrom(loginInfoMap.get(imService).getUser());
 					
 					//to - fix IM Username
-					String imUsername = prepareUsername(imAccount.getUserName(), imService);
+					String imUsername = IMUtil.prepareUsername(imAccount.getUserName(), imService);
 					notificationMessage.setTo(imUsername);
 					
 					session.sendMessage(notificationMessage);

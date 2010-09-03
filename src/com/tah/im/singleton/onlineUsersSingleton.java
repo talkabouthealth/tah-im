@@ -3,7 +3,7 @@ package com.tah.im.singleton;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tah.im.UserInfo;
+import com.tah.im.model.UserInfo;
 
 public class OnlineUsersSingleton {
 	

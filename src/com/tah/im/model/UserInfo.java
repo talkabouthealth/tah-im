@@ -1,10 +1,11 @@
-package com.tah.im;
+package com.tah.im.model;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.mongodb.DBObject;
+import com.tah.im.IMAccountBean;
 
 
 public class UserInfo {
