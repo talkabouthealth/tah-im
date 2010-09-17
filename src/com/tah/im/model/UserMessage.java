@@ -26,7 +26,7 @@ public class UserMessage {
 				return body;
 			}
 			int startIndex = getCommandText().length() + 2;
-			if (startIndex == body.length()) {
+			if (startIndex >= body.length()) {
 				return null;
 			}
 			else {
@@ -42,7 +42,10 @@ public class UserMessage {
 	private MessageCommand command;
 	private String param;
 	
-	
+	@Override
+	public String toString() {
+		return command+" : "+param;
+	}
 	public MessageCommand getCommand() {
 		return command;
 	}

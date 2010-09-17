@@ -18,7 +18,7 @@ public class MessageHandler {
 	
 	//timeout when we need to reply automatially or ask user confirmation
 	//in minutes
-	private static final int REPLY_TIMEOUT = 3;
+	private static final int REPLY_TIMEOUT = 10;
 	
 	/**
 	 * Previous messages (not commands) of a user and 
@@ -37,7 +37,15 @@ public class MessageHandler {
 	public void handle(Message message) {
 		System.out.println("Message received:\n" + message);
 
-		String reply = prepareReply(message);
+		String reply = null;
+		try {
+			reply = prepareReply(message);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			reply = "Sorry, unknown error.";
+		}
+		
 		
 		// Create msg content
 		Message replyMessage = new Message();
@@ -113,18 +121,7 @@ public class MessageHandler {
 		case YES:
 			//confirm sending of @reply to message
 			if (previousNotification != null && previousMessage != null) {
-				
-				//NotificationType.CONVO
-				String id = APIUtil.createAnswer(previousNotification.getRelatedId(), 
-							userInfo.getUid(), "", previousMessage.getParam());
-				
-				if (id != null) {
-					return "Thank you. Your answer/reply was sent to "+previousNotification.getUserName();
-				}
-				else {
-					//TODO: send error
-					return "Error.";
-				}
+				return saveAnswer(previousNotification, userInfo, previousMessage.getParam());
 			}
 			break;
 			
@@ -133,22 +130,13 @@ public class MessageHandler {
 					"@start <conversation topic>, @question <question>, @reply <reply>. For example, \"@question " +
 					"What are some things you wish people had said or done?\".";
 			
-			
 		case NO_COMMAND:
 			//if < 10 mins - reply!
 			Calendar limitTime = Calendar.getInstance();
 			limitTime.add(Calendar.SECOND, -REPLY_TIMEOUT);
 			if (previousNotification != null 
 					&& previousNotification.getTime().compareTo(limitTime.getTime()) > 0) {
-				switch (previousNotification.getType()) {
-				case CONVO:
-					//NotificationType.CONVO
-					String id = APIUtil.createAnswer(previousNotification.getRelatedId(), 
-								userInfo.getUid(), "", imMessage.getParam());
-					return "Thank you, your answer was added.";
-				case ANSWER:
-					return "Thank you, your reply was sent to "+previousNotification.getUserName()+".";
-				}
+				return saveAnswer(previousNotification, userInfo, imMessage.getParam());
 			}
 			else {
 				//if not - ask!!
@@ -158,11 +146,25 @@ public class MessageHandler {
 				 	"Type \"@start\" to start a live conversation, " +
 				 	"\"@question\" to ask a question, or \"@reply\" to reply.";
 			}
-			
-			break;
 		}
 		
 		return reply;
+	}
+	
+	private String saveAnswer(Notification previousNotification, UserInfo userInfo, String text) {
+		switch (previousNotification.getType()) {
+		case CONVO:
+			//NotificationType.CONVO
+			String id = APIUtil.createAnswer(previousNotification.getRelatedId(), 
+						userInfo.getUid(), "", text);
+			return "Thank you, your answer was added.";
+		case ANSWER:
+			id = APIUtil.createAnswer("", 
+					userInfo.getUid(), previousNotification.getRelatedId(), text);
+			return "Thank you, your reply was sent to "+previousNotification.getUserName()+".";
+		}
+		
+		return null;
 	}
 
 	private UserMessage parseMessage(String body) {
@@ -178,7 +180,6 @@ public class MessageHandler {
 			if (body.startsWith("@"+command.getCommandText())) {
 				message.setCommand(command);
 				message.setParam(command.parseParam(body));
-				
 				break;
 			}
 		}

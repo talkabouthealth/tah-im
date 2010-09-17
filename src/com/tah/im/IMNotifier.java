@@ -140,7 +140,6 @@ public class IMNotifier {
 		System.out.println("Broadcast...\n");
 		
 		//TODO: update for convos/questions
-		
 		DBObject convoDBObject = DBUtil.getConvoById(convoId);
 		if (convoDBObject == null) {
 			System.err.println("Bad topicId for broadcasting: "+convoId);
@@ -178,6 +177,7 @@ public class IMNotifier {
 					notification.setText(text);
 					messageHandler.saveNotification(imAccount, notification);
 					
+					System.out.println("Sending message to... "+notificationMessage.getTo());
 					session.sendMessage(notificationMessage);
 				}
 				
@@ -188,7 +188,8 @@ public class IMNotifier {
 		}
 	}
 	
-	public void answerNotify(String[] uidArray, String fromTalker, String convoId, String answerText) {
+	public void answerNotify(String[] uidArray, String fromTalker, String convoId, 
+			String parentId, String answerId, String answerText) {
 		DBObject convoDBObject = DBUtil.getConvoById(convoId);
 		if (convoDBObject == null) {
 			System.err.println("Bad convoId for notification: "+convoId);
@@ -197,8 +198,16 @@ public class IMNotifier {
 		
 		Message notificationMessage = new Message();
 		String authorUserName = fromTalker;
-		String text = "@"+authorUserName+" provided an Answer to this request: " +
-				"\""+answerText+"\". (To reply to @"+authorUserName+", just reply with your message.)";
+		
+		String text = "";
+		if (parentId == null) {
+			text = "@"+authorUserName+" provided an Answer to this request: " +
+			"\""+answerText+"\". (To reply to @"+authorUserName+", just reply with your message.)";
+		}
+		else {
+			text = "@"+authorUserName+" replied: " +
+			"\""+answerText+"\". (To reply to @"+authorUserName+", just reply with your message.)";
+		}
 		notificationMessage.setBody(text);
 		
 		for(int i = 0; i < uidArray.length; i++) {
@@ -216,7 +225,12 @@ public class IMNotifier {
 					notificationMessage.setTo(imUsername);
 					
 					Notification notification = new Notification(NotificationType.ANSWER);
-					notification.setRelatedId(convoId);
+					if (parentId == null) {
+						notification.setRelatedId(answerId);
+					}
+					else {
+						notification.setRelatedId(parentId);
+					}
 					notification.setUserName(authorUserName);
 					notification.setText(text);
 					messageHandler.saveNotification(imAccount, notification);
