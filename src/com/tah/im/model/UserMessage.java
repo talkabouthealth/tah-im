@@ -7,6 +7,7 @@ public class UserMessage {
 		START_QUESTION("question"),
 		REPLY("reply"),
 		EXIT("exit"),
+		YES("yes"),
 		
 		NO_COMMAND("");
 		
@@ -24,8 +25,7 @@ public class UserMessage {
 			if (this == NO_COMMAND) {
 				return body;
 			}
-			//TODO: bad parsing
-			int startIndex = getCommandText().length() + 1;
+			int startIndex = getCommandText().length() + 2;
 			if (startIndex == body.length()) {
 				return null;
 			}

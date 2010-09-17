@@ -8,7 +8,6 @@ import improject.Message;
 import improject.MessageListener;
 import improject.UserListener;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +19,6 @@ import com.tah.im.model.Notification.NotificationType;
 import com.tah.im.model.UserInfo;
 import com.tah.im.singleton.OnlineUsersSingleton;
 
-//TODO: make good logging?
 public class IMNotifier {
 	
 	public static final String TALK_URL = "http://talkabouthealth.com:9000/talk/";
@@ -155,7 +153,8 @@ public class IMNotifier {
 		String authorUserName = (String)((DBRef)convoDBObject.get("uid")).fetch().get("uname");
 		String convoTitle = (String)convoDBObject.get("topic");
 		String text = authorUserName+" is requesting support for: " +
-				"\""+convoTitle+"\". Click here to help: "+url;
+				"\""+convoTitle+"\". Click here to help: "+url+" \n" +
+				"Or to add an Answer to this request, just reply.";
 		notificationMessage.setBody(text);
 		
 		//sending message
@@ -187,5 +186,49 @@ public class IMNotifier {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void answerNotify(String[] uidArray, String fromTalker, String convoId, String answerText) {
+		DBObject convoDBObject = DBUtil.getConvoById(convoId);
+		if (convoDBObject == null) {
+			System.err.println("Bad convoId for notification: "+convoId);
+			return;
+		}
+		
+		Message notificationMessage = new Message();
+		String authorUserName = fromTalker;
+		String text = "@"+authorUserName+" provided an Answer to this request: " +
+				"\""+answerText+"\". (To reply to @"+authorUserName+", just reply with your message.)";
+		notificationMessage.setBody(text);
+		
+		for(int i = 0; i < uidArray.length; i++) {
+			try {
+				UserInfo userInfo = DBUtil.getUserById(uidArray[i]);
+				
+				for (IMAccount imAccount : userInfo.getImAccounts()) {
+					//from - get account according to user's IM Service
+					IMService imService = IMUtil.getIMServiceByName(imAccount.getService());
+					notificationMessage.setImService(imService);
+					notificationMessage.setFrom(loginInfoMap.get(imService).getUser());
+					
+					//to - fix IM Username
+					String imUsername = IMUtil.prepareUsername(imAccount.getUserName(), imService);
+					notificationMessage.setTo(imUsername);
+					
+					Notification notification = new Notification(NotificationType.ANSWER);
+					notification.setRelatedId(convoId);
+					notification.setUserName(authorUserName);
+					notification.setText(text);
+					messageHandler.saveNotification(imAccount, notification);
+					
+					session.sendMessage(notificationMessage);
+				}
+				
+				DBUtil.saveNotification(uidArray[i], convoId);
+			} catch (IMException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 }

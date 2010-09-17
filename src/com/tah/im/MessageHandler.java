@@ -1,20 +1,18 @@
 package com.tah.im;
 
+import improject.IMException;
+import improject.Message;
+
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import sun.misc.GC.LatencyRequest;
 
 import com.tah.im.model.IMAccount;
 import com.tah.im.model.Notification;
-import com.tah.im.model.UserMessage;
-import com.tah.im.model.UserMessage.MessageCommand;
 import com.tah.im.model.UserInfo;
-
-import improject.IMException;
-import improject.Message;
+import com.tah.im.model.UserMessage;
+import com.tah.im.model.Notification.NotificationType;
+import com.tah.im.model.UserMessage.MessageCommand;
 
 public class MessageHandler {
 	
@@ -23,9 +21,8 @@ public class MessageHandler {
 	private static final int REPLY_TIMEOUT = 3;
 	
 	/**
-	 * We use it for 2 step process of starting topic via IM.
-	 * Stores first received message - topic (map value) from particular user (map key)
-	 * TODO: maybe user timeout map? We don't need very old messages.
+	 * Previous messages (not commands) of a user and 
+	 * previous notifications to this user (new convos, replies, etc.)
 	 */
 	private Map<IMAccount, UserMessage> messages = new HashMap<IMAccount, UserMessage>();
 	private Map<IMAccount, Notification> notifications = new HashMap<IMAccount, Notification>();
@@ -64,54 +61,73 @@ public class MessageHandler {
 			//if no such user - reply with registration message
 			//TODO: url to Notifications/Accounts page?
 			return "Hi, thank you for the message. Please register here: "+IMNotifier.SIGNUP_URL;
-			
 		}
 		
 		String reply = null;
 		String body = message.getBody();
 		
-		//TODO: save only no-commands?
 		UserMessage previousMessage = messages.get(userInfo.getCurrentIMAccount());
 		Notification previousNotification = notifications.get(userInfo.getCurrentIMAccount());
 		
 		UserMessage imMessage = parseMessage(body);
-		messages.put(userInfo.getCurrentIMAccount(), imMessage);
+		if (imMessage.getCommand() == MessageCommand.NO_COMMAND) {
+			messages.put(userInfo.getCurrentIMAccount(), imMessage);
+		}
 		
 		switch (imMessage.getCommand()) {
 		case START_CONVO:
 		case START_QUESTION:
 			String newConvo = imMessage.getParam();
-			if (newConvo == null) {
-				if (previousMessage != null) {
-					newConvo = previousMessage.getParam();
-				}
-				else {
-					//TODO: possible?
-				}
+			if (newConvo == null && previousMessage != null) {
+				newConvo = previousMessage.getParam();
 			}
 			
-//			int tid = DBUtil.createTopic(userInfo.getUid(), previousMessage);
-//			reply = "Thank you. Click on this link to join the conversation: " + IMNotifier.TALK_URL + tid;
-			int tid = 1;
-			return "Thank you. Click on this link to start the live conversation: " + IMNotifier.TALK_URL + tid + newConvo;
-			
-			//send request to API
-//			break;
-		case REPLY:
-			String newReply = imMessage.getParam();
-			if (newReply == null) {
-				if (previousMessage != null) {
-					//TODO: yes handling!!
-					return "Thank you. Your last message was <"+previousNotification.getText()+">.\n" +
-							"Would you like to reply to this message with \""+previousMessage.getParam()+"\"? " +
-							"Reply with 'yes' to send the message, or @exit to start over.";
+			String tid = APIUtil.createConvo(userInfo.getUid(), newConvo);
+			if (tid != null) {
+				if (imMessage.getCommand() == MessageCommand.START_CONVO) {
+					return "Thank you. Click on this link to start the live conversation: " + IMNotifier.TALK_URL + tid;
 				}
 				else {
-					//TODO: possible?
+					return "Thank you. We will find members to answer your question and send you the Answers via IM and email.";
 				}
+			}
+			else {
+				//TODO: send error
+				return "Error.";
+			}
+			
+		case REPLY:
+			String newReply = imMessage.getParam();
+			if (newReply == null && previousMessage != null) {
+				newReply = previousMessage.getParam();
+			}
+			
+			if (previousNotification != null && newReply != null) {
+				return "Thank you. Your last message was <"+previousNotification.getText()+">.\n" +
+						"Would you like to reply to this message with \""+newReply+"\"? " +
+						"Reply with 'yes' to send the message, or @exit to start over.";
 			}
 			
 			break;
+			
+		case YES:
+			//confirm sending of @reply to message
+			if (previousNotification != null && previousMessage != null) {
+				
+				//NotificationType.CONVO
+				String id = APIUtil.createAnswer(previousNotification.getRelatedId(), 
+							userInfo.getUid(), "", previousMessage.getParam());
+				
+				if (id != null) {
+					return "Thank you. Your answer/reply was sent to "+previousNotification.getUserName();
+				}
+				else {
+					//TODO: send error
+					return "Error.";
+				}
+			}
+			break;
+			
 		case EXIT:
 			return "Starting over. Send us a message to begin again. Advanced users may use the following commands: " +
 					"@start <conversation topic>, @question <question>, @reply <reply>. For example, \"@question " +
@@ -126,7 +142,9 @@ public class MessageHandler {
 					&& previousNotification.getTime().compareTo(limitTime.getTime()) > 0) {
 				switch (previousNotification.getType()) {
 				case CONVO:
-					//TODO: save answer
+					//NotificationType.CONVO
+					String id = APIUtil.createAnswer(previousNotification.getRelatedId(), 
+								userInfo.getUid(), "", imMessage.getParam());
 					return "Thank you, your answer was added.";
 				case ANSWER:
 					return "Thank you, your reply was sent to "+previousNotification.getUserName()+".";
@@ -134,7 +152,7 @@ public class MessageHandler {
 			}
 			else {
 				//if not - ask!!
-				return reply = "Hi, thank you for the message: \""+message.getBody()+"\".\n"+
+				return reply = "Hi, thank you for the message: \""+imMessage.getParam()+"\".\n"+
 				 	"Would you like to start a new conversation, ask a question, " +
 				 	"or reply to your last message? "+
 				 	"Type \"@start\" to start a live conversation, " +
@@ -144,29 +162,17 @@ public class MessageHandler {
 			break;
 		}
 		
-//			UserMessage previousMessage = messages.get(userInfo.getCurrentIMAccount());
-//			if (previousMessage == null) {
-//				reply = "Hi, thank you for the message. "+
-//				 	"Would you like to start the new conversation: \""+message.getBody()+"\"? "+
-//				 	"Reply 'yes' to start the new conversation. " +
-//				 	"To contact us, please send an email to support@talkabouthealth.com.";
-//			}
-//			else {
-//				//second step - create topic if 'yes'
-//				if (message.getBody().equals("yes")) {
-////					int tid = DBUtil.createTopic(userInfo.getUid(), previousMessage);
-////					reply = "Thank you. Click on this link to join the conversation: " + IMNotifier.TALK_URL + tid;
-//				}
-//				else {
-//					reply = "Conversation isn't created. Please write again to create a new one.";
-//				}
-//			}
-		
 		return reply;
 	}
 
 	private UserMessage parseMessage(String body) {
 		UserMessage message = new UserMessage();
+		
+		//"yes" command doesn't have "@" prefix, so we add it manully
+		//this allows unified command parsing
+		if (body != null && body.equals("yes")) {
+			body = "@yes";
+		}
 		
 		for (MessageCommand command : MessageCommand.values()) {
 			if (body.startsWith("@"+command.getCommandText())) {
