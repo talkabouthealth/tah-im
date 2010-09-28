@@ -11,7 +11,6 @@ import com.tah.im.model.IMAccount;
 import com.tah.im.model.Notification;
 import com.tah.im.model.UserInfo;
 import com.tah.im.model.UserMessage;
-import com.tah.im.model.Notification.NotificationType;
 import com.tah.im.model.UserMessage.MessageCommand;
 
 public class MessageHandler {
@@ -133,7 +132,7 @@ public class MessageHandler {
 		case NO_COMMAND:
 			//if < 10 mins - reply!
 			Calendar limitTime = Calendar.getInstance();
-			limitTime.add(Calendar.SECOND, -REPLY_TIMEOUT);
+			limitTime.add(Calendar.MINUTE, -REPLY_TIMEOUT);
 			if (previousNotification != null 
 					&& previousNotification.getTime().compareTo(limitTime.getTime()) > 0) {
 				return saveAnswer(previousNotification, userInfo, imMessage.getParam());

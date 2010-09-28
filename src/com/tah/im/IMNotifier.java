@@ -149,7 +149,9 @@ public class IMNotifier {
 		Message notificationMessage = new Message();
 		String url = TALK_URL+convoDBObject.get("tid");
 		
-		String authorUserName = (String)((DBRef)convoDBObject.get("uid")).fetch().get("uname");
+		DBObject authorDBObject = ((DBRef)convoDBObject.get("uid")).fetch();
+		String authorId = authorDBObject.get("_id").toString();
+		String authorUserName = (String)authorDBObject.get("uname");
 		String convoTitle = (String)convoDBObject.get("topic");
 		String text = authorUserName+" is requesting support for: " +
 				"\""+convoTitle+"\". Click here to help: "+url+" \n" +
@@ -158,6 +160,10 @@ public class IMNotifier {
 		
 		//sending message
 		for(int i = 0; i < uidArray.length; i++) {
+			//do not send notification to author of the event
+			if (authorId.equals(uidArray[i])) {
+				continue;
+			}
 			try {
 				UserInfo userInfo = DBUtil.getUserById(uidArray[i]);
 				
@@ -213,6 +219,10 @@ public class IMNotifier {
 		for(int i = 0; i < uidArray.length; i++) {
 			try {
 				UserInfo userInfo = DBUtil.getUserById(uidArray[i]);
+				//do not notify author of the answer/reply
+				if (authorUserName.equals(userInfo.getUname())) {
+					continue;
+				}
 				
 				for (IMAccount imAccount : userInfo.getImAccounts()) {
 					//from - get account according to user's IM Service
