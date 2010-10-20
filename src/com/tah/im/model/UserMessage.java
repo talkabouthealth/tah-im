@@ -59,7 +59,6 @@ public class UserMessage {
 		this.param = param;
 	}
 	public boolean hasParam() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

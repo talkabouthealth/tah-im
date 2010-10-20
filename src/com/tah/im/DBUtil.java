@@ -80,7 +80,6 @@ private static Mongo mongo;
 	 * Tries to insert topic 'count' times (in case of duplicate key error on 'tid' field)
 	 * Returns -1 in case of failure
 	 */
-	//TODO: move similar code in one jar ?
 	private static int createTopic(String talkerId, String topicName, int count) {
 		if (count == 0) {
 			return -1;

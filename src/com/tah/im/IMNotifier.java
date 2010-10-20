@@ -21,8 +21,9 @@ import com.tah.im.singleton.OnlineUsersSingleton;
 
 public class IMNotifier {
 	
-	public static final String TALK_URL = "http://talkabouthealth.com:9000/talk/";
-	public static final String SIGNUP_URL = "http://www.talkabouthealth.com:9000/signup";
+	public static final String TAH_URL = "http://talkabouthealth.com:9000/";
+	public static final String TALK_URL = TAH_URL+"talk/";
+	public static final String SIGNUP_URL = TAH_URL+"signup";
 	
 	private static IMNotifier instance;
 	
@@ -136,27 +137,46 @@ public class IMNotifier {
 		return session;
 	}
 
-	public void broadcast(String[] uidArray, String convoId) throws Exception {
+	public String broadcast(String[] uidArray, String convoId) throws Exception {
 		System.out.println("Broadcast...\n");
 		
-		//TODO: update for convos/questions
 		DBObject convoDBObject = DBUtil.getConvoById(convoId);
 		if (convoDBObject == null) {
 			System.err.println("Bad topicId for broadcasting: "+convoId);
-			return;
+			return null;
 		}
 		
 		Message notificationMessage = new Message();
-		String url = TALK_URL+convoDBObject.get("tid");
+		String talkURL = TALK_URL+convoDBObject.get("tid");
+		String convoURL = TAH_URL+convoDBObject.get("main_url");
 		
 		DBObject authorDBObject = ((DBRef)convoDBObject.get("uid")).fetch();
 		String authorId = authorDBObject.get("_id").toString();
 		String authorUserName = (String)authorDBObject.get("uname");
 		String convoTitle = (String)convoDBObject.get("topic");
-		String text = authorUserName+" is requesting support for: " +
-				"\""+convoTitle+"\". Click here to help: "+url+" \n" +
-				"Or to add an Answer to this request, just reply.";
-		notificationMessage.setBody(text);
+		
+		StringBuilder text = new StringBuilder();
+		String convoType = (String)convoDBObject.get("type");
+		if ("CONVERSATION".equals(convoType)) {
+//			murray requests a live talk for:
+//			"new talk to test im".
+//			Click here to join the talk: http://talkabouthealth.com:9000/talk/83
+//			To answer, reply to this message.
+			text.append(authorUserName+" requests a live talk for:\n");
+			text.append("\""+convoTitle+"\"\n");
+			text.append("Click here to join the talk: "+talkURL+" \n");
+			text.append("To answer, reply to this message.");
+		}
+		else {
+//			murray asked the question:
+//			"new question to test im"
+//			To answer, reply to this message or click on this link: http://talkabouthealth.com/new-question-to-test-im
+			text.append(authorUserName+" asked the question:\n");
+			text.append("\""+convoTitle+"\"\n");
+			text.append("To answer, reply to this message or click on this link:\n");
+			text.append(convoURL);
+		}
+		notificationMessage.setBody(text.toString());
 		
 		//sending message
 		for(int i = 0; i < uidArray.length; i++) {
@@ -180,7 +200,7 @@ public class IMNotifier {
 					Notification notification = new Notification(NotificationType.CONVO);
 					notification.setRelatedId(convoId);
 					notification.setUserName(authorUserName);
-					notification.setText(text);
+					notification.setText(text.toString());
 					messageHandler.saveNotification(imAccount, notification);
 					
 					System.out.println("Sending message to... "+notificationMessage.getTo());
@@ -192,6 +212,8 @@ public class IMNotifier {
 				e.printStackTrace();
 			}
 		}
+		
+		return notificationMessage.getBody();
 	}
 	
 	public void answerNotify(String[] uidArray, String fromTalker, String convoId, 
@@ -205,16 +227,24 @@ public class IMNotifier {
 		Message notificationMessage = new Message();
 		String authorUserName = fromTalker;
 		
-		String text = "";
+		StringBuilder text = new StringBuilder();
 		if (parentId == null) {
-			text = "@"+authorUserName+" provided an Answer to this request: " +
-			"\""+answerText+"\". (To reply to @"+authorUserName+", just reply with your message.)";
+//			@mn_jones answered this request:
+//				"here is an answer to the request"
+//				To respond to @mn_jones, reply to this message.
+			text.append("@"+authorUserName+" answered this request:\n");
+			text.append("\""+answerText+"\"\n");
+			text.append("To respond to @"+authorUserName+", reply to this message.");
 		}
 		else {
-			text = "@"+authorUserName+" replied: " +
-			"\""+answerText+"\". (To reply to @"+authorUserName+", just reply with your message.)";
+//			@murrayjones replied:
+//				"reply to test from mn_jones".
+//				To respond to @murrayjones, reply with your message.
+			text.append("@"+authorUserName+" replied:\n");
+			text.append("\""+answerText+"\"\n");
+			text.append("To respond to @"+authorUserName+", reply with your message.");
 		}
-		notificationMessage.setBody(text);
+		notificationMessage.setBody(text.toString());
 		
 		for(int i = 0; i < uidArray.length; i++) {
 			try {
@@ -242,7 +272,7 @@ public class IMNotifier {
 						notification.setRelatedId(parentId);
 					}
 					notification.setUserName(authorUserName);
-					notification.setText(text);
+					notification.setText(text.toString());
 					messageHandler.saveNotification(imAccount, notification);
 					
 					session.sendMessage(notificationMessage);

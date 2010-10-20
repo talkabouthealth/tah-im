@@ -34,7 +34,6 @@ public class IMUtil {
 		return userInfo;
 	}
 	
-	//TODO move it to enum?
 	public static IMService getIMServiceByName(String imService) {
 		//'YahooIM', 'WindowLive', 'GoogleTalk'
 		if ("GoogleTalk".equals(imService)) {

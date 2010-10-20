@@ -56,7 +56,6 @@ public class MessageHandler {
 		try {
 			imNotifier.getSession().sendMessage(replyMessage);
 		} catch (IMException e) {
-			//TODO: handle errors correctly?
 			e.printStackTrace();
 		}
 	}
@@ -66,7 +65,6 @@ public class MessageHandler {
 		UserInfo userInfo = IMUtil.getUserInfo(message.getFrom());
 		if (!userInfo.isExist()) {
 			//if no such user - reply with registration message
-			//TODO: url to Notifications/Accounts page?
 			return "Hi, thank you for the message. Please register here: "+IMNotifier.SIGNUP_URL;
 		}
 		
@@ -99,8 +97,7 @@ public class MessageHandler {
 				}
 			}
 			else {
-				//TODO: send error
-				return "Error.";
+				return "Sorry, internal error.";
 			}
 			
 		case REPLY:
