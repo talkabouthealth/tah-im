@@ -19,7 +19,7 @@ public class testIM {
 		
 		Thread.sleep(3000);
 		
-		imNotifier.broadcast(new String[]{"4c2cb43160adf3055c97d061"}, "4c5bce0aaeccbce58e8da64f");
+//		imNotifier.broadcast(new String[]{"4c2cb43160adf3055c97d061"}, "4c5bce0aaeccbce58e8da64f");
 		
 //		Thread.sleep(10000);
 		

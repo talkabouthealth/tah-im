@@ -137,7 +137,7 @@ public class IMNotifier {
 		return session;
 	}
 
-	public String broadcast(String[] uidArray, String convoId) throws Exception {
+	public String broadcast(String[] uidArray, String convoId, String restartTalkerId) throws Exception {
 		System.out.println("Broadcast...\n");
 		
 		DBObject convoDBObject = DBUtil.getConvoById(convoId);
@@ -150,19 +150,28 @@ public class IMNotifier {
 		String talkURL = TALK_URL+convoDBObject.get("tid");
 		String convoURL = TAH_URL+convoDBObject.get("main_url");
 		
-		DBObject authorDBObject = ((DBRef)convoDBObject.get("uid")).fetch();
-		String authorId = authorDBObject.get("_id").toString();
-		String authorUserName = (String)authorDBObject.get("uname");
+		String talkerId = null;
+		String talkerUserName = null;
+		if (restartTalkerId != null) {
+			talkerId = restartTalkerId;
+			UserInfo userInfo = DBUtil.getUserById(talkerId);
+			talkerUserName = userInfo.getUname();
+		}
+		else {
+			DBObject authorDBObject = ((DBRef)convoDBObject.get("uid")).fetch();
+			talkerId = authorDBObject.get("_id").toString();
+			talkerUserName = (String)authorDBObject.get("uname");
+		}
 		String convoTitle = (String)convoDBObject.get("topic");
 		
 		StringBuilder text = new StringBuilder();
 		String convoType = (String)convoDBObject.get("type");
-		if ("CONVERSATION".equals(convoType)) {
+		if (restartTalkerId != null || "CONVERSATION".equals(convoType)) {
 //			murray requests a live talk for:
 //			"new talk to test im".
 //			Click here to join the talk: http://talkabouthealth.com:9000/talk/83
 //			To answer, reply to this message.
-			text.append(authorUserName+" requests a live talk for:\n");
+			text.append(talkerUserName+" requests a live talk for:\n");
 			text.append("\""+convoTitle+"\"\n");
 			text.append("Click here to join the talk: "+talkURL+" \n");
 			text.append("To answer, reply to this message.");
@@ -171,7 +180,7 @@ public class IMNotifier {
 //			murray asked the question:
 //			"new question to test im"
 //			To answer, reply to this message or click on this link: http://talkabouthealth.com/new-question-to-test-im
-			text.append(authorUserName+" asked the question:\n");
+			text.append(talkerUserName+" asked the question:\n");
 			text.append("\""+convoTitle+"\"\n");
 			text.append("To answer, reply to this message or click on this link:\n");
 			text.append(convoURL);
@@ -181,7 +190,7 @@ public class IMNotifier {
 		//sending message
 		for(int i = 0; i < uidArray.length; i++) {
 			//do not send notification to author of the event
-			if (authorId.equals(uidArray[i])) {
+			if (talkerId.equals(uidArray[i])) {
 				continue;
 			}
 			try {
@@ -199,7 +208,7 @@ public class IMNotifier {
 					
 					Notification notification = new Notification(NotificationType.CONVO);
 					notification.setRelatedId(convoId);
-					notification.setUserName(authorUserName);
+					notification.setUserName(talkerUserName);
 					notification.setText(text.toString());
 					messageHandler.saveNotification(imAccount, notification);
 					
